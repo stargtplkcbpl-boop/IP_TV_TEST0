@@ -1,1929 +1,3205 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
     <title>Star TV - Ultimate Pro Admin Edition</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
     <style>
+
         :root {
+
             --bg: #07090e;
+
             --surface: rgba(15, 23, 42, 0.75);
+
             --surface-card: rgba(19, 29, 51, 0.85);
+
             --primary: #3b82f6;
+
             --text: #f8fafc;
+
             --muted: #94a3b8;
+
             --red: #ef4444;
+
             --green: #10b981;
+
             --gold: #f59e0b;
+
             --border: rgba(255, 255, 255, 0.1);
+
         }
+
+
 
         * {
+
             box-sizing: border-box;
+
             margin: 0;
+
             padding: 0;
+
             font-family: 'Plus Jakarta Sans', sans-serif;
+
         }
+
+
 
         body {
+
             background-color: var(--bg);
+
             background-image: radial-gradient(circle at 50% -20%, #1e293b, var(--bg));
+
             color: var(--text);
+
             min-height: 100vh;
+
             padding-bottom: 50px;
+
             background-attachment: fixed;
+
             background-size: cover;
+
             background-position: center;
+
             transition: 0.5s;
+
         }
+
+
 
         #customerLockScreen {
+
             position: fixed;
+
             inset: 0;
+
             background: rgba(7, 9, 14, 0.95);
+
             backdrop-filter: blur(25px);
+
             -webkit-backdrop-filter: blur(25px);
+
             z-index: 99999;
+
             display: flex;
+
             flex-direction: column;
+
             align-items: center;
+
             justify-content: center;
+
             padding: 20px;
+
         }
+
+
 
         .lock-box {
+
             background: var(--surface-card);
+
             width: 100%;
+
             max-width: 400px;
+
             padding: 35px 25px;
+
             border-radius: 20px;
+
             border: 1px solid var(--border);
+
             text-align: center;
+
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+
         }
+
+
 
         .lock-box h2 {
+
             font-weight: 800;
+
             margin-bottom: 10px;
+
             font-size: 24px;
+
             color: #fff;
+
         }
+
+
 
         .lock-box p {
+
             color: var(--muted);
+
             font-size: 13px;
+
             margin-bottom: 25px;
+
         }
+
+
 
         .pin-input {
+
             width: 100%;
+
             padding: 15px;
+
             border-radius: 10px;
+
             background: rgba(0,0,0,0.5);
+
             border: 2px solid var(--border);
+
             color: var(--gold);
+
             font-size: 24px;
+
             font-weight: 800;
+
             text-align: center;
+
             letter-spacing: 5px;
+
             margin-bottom: 20px;
+
             outline: none;
+
         }
+
+
 
         .pin-input:focus {
+
             border-color: var(--primary);
+
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+
         }
+
+
 
         .lock-err {
+
             color: var(--red);
+
             font-size: 13px;
+
             font-weight: 700;
+
             margin-bottom: 15px;
+
             display: none;
+
         }
+
+
 
         .notice-bar {
+
             background: linear-gradient(90deg, var(--red), #b91c1c);
+
             color: white;
+
             padding: 6px 15px;
+
             font-size: 13px;
+
             font-weight: 600;
+
             display: none;
+
             box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
+
         }
+
+
 
         .navbar {
+
             background: rgba(7, 9, 14, 0.7);
+
             backdrop-filter: blur(20px);
+
             position: sticky;
+
             top: 0;
+
             z-index: 100;
+
             padding: 15px 24px;
+
             display: flex;
+
             justify-content: space-between;
+
             align-items: center;
+
             border-bottom: 1px solid var(--border);
+
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+
         }
+
+
 
         .nav-left {
+
             display: flex;
+
             align-items: center;
+
             gap: 18px;
+
         }
+
+
 
         .menu-icon {
+
             font-size: 26px;
+
             cursor: pointer;
+
             color: var(--text);
+
             transition: 0.3s;
+
         }
+
+
 
         .menu-icon:hover {
+
             color: var(--primary);
+
             transform: scale(1.1);
+
         }
+
+
 
         .brand {
+
             display: flex;
+
             align-items: center;
+
             gap: 12px;
+
             font-size: 20px;
+
             font-weight: 800;
+
             cursor: pointer;
+
             user-select: none;
+
         }
+
+
 
         .brand span {
+
             color: var(--primary);
+
             text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+
         }
+
+
 
         .search-box {
+
             padding: 9px 18px;
+
             border-radius: 25px;
+
             border: 1px solid var(--border);
+
             background: rgba(255,255,255,0.03);
+
             color: #fff;
+
             outline: none;
+
             font-size: 13px;
+
             width: 100%;
+
             max-width: 260px;
+
             transition: 0.3s;
+
         }
+
+
 
         .search-box:focus {
+
             border-color: var(--primary);
+
             background: rgba(255,255,255,0.08);
+
         }
+
+
 
         .container {
+
             max-width: 1200px;
+
             margin: 0 auto;
+
             padding: 25px 16px;
+
         }
+
+
 
         .player-box {
+
             background: #000;
+
             border-radius: 20px;
+
             overflow: hidden;
+
             margin-bottom: 20px;
+
             border: 1px solid rgba(255,255,255,0.15);
+
             box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+
         }
+
+
 
         .player-wrap {
+
             width: 100%;
+
             aspect-ratio: 16/9;
+
             background: #000;
+
             position: relative;
+
         }
+
+
 
         video {
+
             width: 100%;
+
             height: 100%;
+
             object-fit: contain;
+
         }
+
+
 
         .now-playing {
+
             background: var(--surface);
+
             padding: 18px 25px;
+
             border-top: 1px solid var(--border);
+
             display: flex;
+
             justify-content: space-between;
+
             align-items: center;
+
             backdrop-filter: blur(10px);
+
         }
+
+
 
         @keyframes pulse-red {
+
             0% { opacity: 1; }
+
             50% { opacity: 0.4; }
+
             100% { opacity: 1; }
+
         }
+
+
 
         .live-dot {
+
             color: var(--red);
+
             display: inline-block;
-            animationLogin Failed आ रहा है क्योंकि **Firebase में पुराना पासवर्ड सेव है**।
 
-कोड में हमने नया पासवर्ड डाला है, लेकिन Firebase Realtime Database में पहले से पुराना settings (`admin` / `admin123`) सेव है। इसलिए नया पासवर्ड काम नहीं कर रहा।
-
----
-
-### अभी के लिए ये credentials यूज़ करो:
-
-**Username:** `admin`  
-**Password:** `admin123`
-
----
-
-### अगर आप चाहते हो कि नया पासवर्ड ही चले (`staradmin` / `Star@TV2026`)
-
-तो नीचे दिया गया **फिक्स्ड कोड** यूज़ करो। मैंने कोड में थोड़ा बदलाव किया है ताकि हर बार नया Username और Password फोर्स से सेट हो जाए।
-
-**नया Admin Login:**
-- **Username:** `staradmin`
-- **Password:** `Star@TV2026`
-
----
-
-नीचे पूरा फिक्स्ड कोड है। इसे कॉपी करके अपनी `index.html` फाइल में पेस्ट कर दो और GitHub पर अपलोड कर दो:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Star TV - Ultimate Pro Admin Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        :root {
-            --bg: #07090e;
-            --surface: rgba(15, 23, 42, 0.75);
-            --surface-card: rgba(19, 29, 51, 0.85);
-            --primary: #3b82f6;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --red: #ef4444;
-            --green: #10b981;
-            --gold: #f59e0b;
-            --border: rgba(255, 255, 255, 0.1);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg);
-            background-image: radial-gradient(circle at 50% -20%, #1e293b, var(--bg));
-            color: var(--text);
-            min-height: 100vh;
-            padding-bottom: 50px;
-            background-attachment: fixed;
-            background-size: cover;
-            background-position: center;
-            transition: 0.5s;
-        }
-
-        #customerLockScreen {
-            position: fixed;
-            inset: 0;
-            background: rgba(7, 9, 14, 0.95);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            z-index: 99999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .lock-box {
-            background: var(--surface-card);
-            width: 100%;
-            max-width: 400px;
-            padding: 35px 25px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
-        }
-
-        .lock-box h2 {
-            font-weight: 800;
-            margin-bottom: 10px;
-            font-size: 24px;
-            color: #fff;
-        }
-
-        .lock-box p {
-            color: var(--muted);
-            font-size: 13px;
-            margin-bottom: 25px;
-        }
-
-        .pin-input {
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            background: rgba(0,0,0,0.5);
-            border: 2px solid var(--border);
-            color: var(--gold);
-            font-size: 24px;
-            font-weight: 800;
-            text-align: center;
-            letter-spacing: 5px;
-            margin-bottom: 20px;
-            outline: none;
-        }
-
-        .pin-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
-        }
-
-        .lock-err {
-            color: var(--red);
-            font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        .notice-bar {
-            background: linear-gradient(90deg, var(--red), #b91c1c);
-            color: white;
-            padding: 6px 15px;
-            font-size: 13px;
-            font-weight: 600;
-            display: none;
-            box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
-        }
-
-        .navbar {
-            background: rgba(7, 9, 14, 0.7);
-            backdrop-filter: blur(20px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: 15px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-        }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
-
-        .menu-icon {
-            font-size: 26px;
-            cursor: pointer;
-            color: var(--text);
-            transition: 0.3s;
-        }
-
-        .menu-icon:hover {
-            color: var(--primary);
-            transform: scale(1.1);
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 20px;
-            font-weight: 800;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .brand span {
-            color: var(--primary);
-            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-        }
-
-        .search-box {
-            padding: 9px 18px;
-            border-radius: 25px;
-            border: 1px solid var(--border);
-            background: rgba(255,255,255,0.03);
-            color: #fff;
-            outline: none;
-            font-size: 13px;
-            width: 100%;
-            max-width: 260px;
-            transition: 0.3s;
-        }
-
-        .search-box:focus {
-            border-color: var(--primary);
-            background: rgba(255,255,255,0.08);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 25px 16px;
-        }
-
-        .player-box {
-            background: #000;
-            border-radius: 20px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.15);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-        }
-
-        .player-wrap {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #000;
-            position: relative;
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .now-playing {
-            background: var(--surface);
-            padding: 18px 25px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(10px);
-        }
-
-        @keyframes pulse-red {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
-
-        .live-dot {
-            color: var(--red);
-            display: inline-block;
             animation: pulse-red 1.5s infinite;
+
             margin-right: 5px;
+
         }
+
+
 
         .recent-bar {
+
             display: flex;
+
             gap: 10px;
+
             overflow-x: auto;
+
             margin-bottom: 20px;
+
             padding-bottom: 5px;
+
             scrollbar-width: none;
+
         }
+
+
 
         .recent-bar::-webkit-scrollbar {
+
             display: none;
+
         }
+
+
 
         .recent-chip {
+
             background: rgba(255,255,255,0.05);
+
             border: 1px solid var(--border);
+
             padding: 6px 14px;
+
             border-radius: 20px;
+
             font-size: 12px;
+
             font-weight: 600;
+
             white-space: nowrap;
+
             cursor: pointer;
+
             color: var(--muted);
+
             transition: 0.2s;
+
         }
+
+
 
         .recent-chip:hover {
+
             background: var(--primary);
+
             color: #fff;
+
             border-color: var(--primary);
+
         }
+
+
 
         .category-tabs {
+
             display: flex;
+
             gap: 12px;
+
             overflow-x: auto;
+
             margin-bottom: 20px;
+
             padding-bottom: 8px;
+
             scrollbar-width: none;
+
         }
+
+
 
         .category-tabs::-webkit-scrollbar {
+
             display: none;
+
         }
+
+
 
         .cat-btn {
+
             background: rgba(255,255,255,0.03);
+
             border: 1px solid var(--border);
+
             color: var(--muted);
+
             padding: 9px 18px;
+
             border-radius: 25px;
+
             cursor: pointer;
+
             white-space: nowrap;
+
             font-size: 13px;
+
             font-weight: 700;
+
             transition: all 0.3s ease;
+
         }
+
+
 
         .cat-btn.active, .cat-btn:hover {
+
             background: var(--primary);
+
             color: white;
+
             border-color: var(--primary);
+
             box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+
         }
+
+
 
         .grid {
+
             display: grid;
+
             grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+
             gap: 20px;
+
         }
+
+
 
         .card {
+
             background: var(--surface-card);
+
             border-radius: 16px;
+
             overflow: hidden;
+
             cursor: pointer;
+
             border: 1px solid var(--border);
+
             position: relative;
+
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+
         }
+
+
 
         .card:hover {
+
             border-color: var(--primary);
+
             transform: translateY(-6px) scale(1.02);
+
             box-shadow: 0 12px 25px rgba(59, 130, 246, 0.25);
+
         }
+
+
 
         .card.premium {
+
             border: 1px solid var(--gold);
+
         }
+
+
 
         .banner {
+
             height: 105px;
+
             display: flex;
+
             align-items: center;
+
             justify-content: center;
+
             background: linear-gradient(135deg, #1e3a8a, #0f172a);
+
             overflow: hidden;
+
             position: relative;
+
         }
+
+
 
         .banner span {
+
             font-size: 14px;
+
             font-weight: 800;
+
             padding: 0 10px;
+
             text-transform: uppercase;
+
             text-align: center;
+
             z-index: 1;
+
         }
+
+
 
         .banner img {
+
             z-index: 1;
+
             position: relative;
+
             width: 100%;
+
             height: 100%;
-            object-fit: contain;
-            background: #0f172a;
-            padding: 6px;
+
+            object-fit: cover;
+
         }
-        .banner img.broken {
-            display: none;
-        }
+
+
 
         .info {
+
             padding: 14px 16px;
+
             position: relative;
+
             display: flex;
+
             justify-content: space-between;
+
             align-items: center;
+
         }
+
+
 
         .name {
+
             font-size: 14px;
+
             font-weight: 700;
+
             white-space: nowrap;
+
             overflow: hidden;
+
             text-overflow: ellipsis;
+
             width: 80%;
+
         }
+
+
 
         .fav-btn {
+
             background: none;
+
             border: none;
+
             cursor: pointer;
+
             font-size: 16px;
+
             color: var(--muted);
+
             transition: 0.2s;
+
         }
+
+
 
         .fav-btn.active {
+
             color: var(--gold);
+
             text-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+
         }
+
+
 
         .vip-badge {
+
             position: absolute;
+
             top: 8px;
+
             left: 8px;
+
             background: linear-gradient(45deg, #f59e0b, #d97706);
+
             color: #fff;
+
             font-size: 10px;
+
             padding: 4px 8px;
+
             border-radius: 6px;
+
             font-weight: 800;
+
             z-index: 2;
+
         }
+
+
 
         .offline-badge {
+
             position: absolute;
+
             top: 8px;
+
             right: 8px;
+
             background: rgba(0,0,0,0.85);
+
             color: var(--red);
+
             font-size: 10px;
+
             padding: 4px 8px;
+
             border-radius: 6px;
+
             font-weight: bold;
+
             border: 1px solid var(--red);
+
             z-index: 2;
+
         }
+
+
 
         .card.offline {
+
             opacity: 0.6;
+
             pointer-events: none;
+
             filter: grayscale(90%);
+
         }
+
+
 
         .admin-overlay {
+
             position: fixed;
+
             inset: 0;
+
             background: rgba(0,0,0,0.85);
+
             z-index: 100000;
+
             display: none;
+
             align-items: center;
+
             justify-content: center;
+
             padding: 10px;
+
             backdrop-filter: blur(10px);
+
         }
+
+
 
         .admin-panel {
+
             background: rgba(15, 23, 42, 0.95);
+
             width: 100%;
+
             max-width: 700px;
+
             border-radius: 20px;
+
             padding: 25px;
+
             border: 1px solid rgba(255,255,255,0.15);
+
             max-height: 90vh;
+
             overflow-y: auto;
+
             box-shadow: 0 25px 50px rgba(0,0,0,0.7);
+
         }
+
+
 
         .admin-header {
+
             display: flex;
+
             justify-content: space-between;
+
             align-items: center;
+
             margin-bottom: 25px;
+
             border-bottom: 1px solid var(--border);
+
             padding-bottom: 15px;
+
         }
+
+
 
         .close-btn {
+
             cursor: pointer;
+
             font-size: 24px;
+
             color: var(--red);
+
             font-weight: bold;
+
             transition: 0.3s;
+
         }
+
+
 
         .close-btn:hover {
+
             transform: rotate(90deg);
+
         }
+
+
 
         .stats-box {
+
             display: flex;
+
             gap: 12px;
+
             margin-bottom: 20px;
+
             flex-wrap: wrap;
+
         }
+
+
 
         .stat {
+
             flex: 1;
+
             min-width: 100px;
+
             background: rgba(255,255,255,0.03);
+
             padding: 15px;
+
             border-radius: 12px;
+
             text-align: center;
+
             border: 1px solid var(--border);
+
         }
+
+
 
         .stat span {
+
             font-size: 22px;
+
             font-weight: 800;
+
             color: var(--primary);
+
             display: block;
+
             margin-bottom: 4px;
+
         }
+
+
 
         .stat div {
+
             font-size: 11px;
+
             color: var(--muted);
+
             text-transform: uppercase;
+
             font-weight: 600;
+
         }
+
+
 
         .admin-section {
+
             background: rgba(0,0,0,0.2);
+
             padding: 20px;
+
             border-radius: 14px;
+
             margin-bottom: 20px;
+
             border: 1px solid var(--border);
+
         }
+
+
 
         .admin-input {
+
             width: 100%;
+
             padding: 14px;
+
             margin-bottom: 12px;
+
             background: rgba(0,0,0,0.5);
+
             border: 1px solid var(--border);
+
             color: #fff;
+
             border-radius: 8px;
+
             font-size: 14px;
+
             outline: none;
+
         }
+
+
 
         .admin-input:focus {
+
             border-color: var(--primary);
+
         }
+
+
 
         .checkbox-wrap {
+
             display: flex;
+
             align-items: center;
+
             gap: 10px;
+
             margin-bottom: 15px;
+
             font-size: 14px;
+
             color: var(--gold);
+
             font-weight: 600;
+
         }
+
+
 
         .checkbox-wrap input {
+
             width: 18px;
+
             height: 18px;
+
             cursor: pointer;
+
             accent-color: var(--gold);
+
         }
+
+
 
         .admin-btn {
+
             background: var(--primary);
+
             color: #fff;
+
             padding: 12px 18px;
+
             border: none;
+
             border-radius: 8px;
+
             cursor: pointer;
+
             width: 100%;
+
             font-weight: 700;
+
             font-size: 14.5px;
+
             transition: 0.3s;
+
             text-transform: uppercase;
+
         }
+
+
 
         .admin-btn:hover {
+
             opacity: 0.9;
+
             transform: translateY(-2px);
+
         }
+
+
 
         .admin-btn-half {
+
             width: 48%;
+
         }
+
+
 
         .btn-row {
+
             display: flex;
+
             justify-content: space-between;
+
             gap: 12px;
+
             margin-top: 10px;
+
         }
+
+
 
         .admin-ch-list {
+
             max-height: 280px;
+
             overflow-y: auto;
+
             margin-top: 15px;
+
             padding-right: 5px;
+
         }
+
+
 
         .admin-ch-list::-webkit-scrollbar {
+
             width: 6px;
+
         }
+
+
 
         .admin-ch-list::-webkit-scrollbar-thumb {
+
             background: var(--border);
+
             border-radius: 10px;
+
         }
+
+
 
         .admin-ch-item {
+
             display: flex;
+
             justify-content: space-between;
+
             align-items: center;
+
             background: rgba(0,0,0,0.4);
+
             padding: 12px;
+
             border-radius: 8px;
+
             margin-bottom: 10px;
+
             border: 1px solid var(--border);
+
         }
+
+
 
         .ch-actions {
+
             display: flex;
+
             gap: 5px;
+
             flex-wrap: wrap;
+
             justify-content: flex-end;
+
         }
+
+
 
         .ch-actions button {
+
             padding: 6px 10px;
+
             border: none;
+
             border-radius: 6px;
+
             cursor: pointer;
+
             color: white;
+
             font-size: 11px;
+
             font-weight: 600;
+
         }
+
+
 
         .btn-top { background: #8b5cf6; }
+
         .btn-edit { background: var(--primary); }
+
         .btn-off { background: #d97706; }
+
         .btn-del { background: var(--red); }
 
+
+
         #loginView, #dashboardView {
+
             display: none;
+
         }
+
     </style>
+
 </head>
+
 <body>
 
+
+
     <div id="customerLockScreen" style="display:none;">
+
         <div class="lock-box">
+
             <h2>🔒 Premium Access</h2>
+
             <p id="lockWelcomeText">Please enter your 30-Day Subscription PIN.</p>
+
             <div id="lockErrorMsg" class="lock-err">Invalid or Expired PIN</div>
+
             <input type="password" id="customerPinInput" class="pin-input" placeholder="••••••" maxlength="6">
+
             <button class="admin-btn" onclick="verifyCustomerPin()">Unlock Channels</button>
+
             <p style="margin-top: 25px; margin-bottom: 0; font-size: 12px;">
+
                 Need a subscription? <br>
+
                 <a id="getSubscriptionBtn" href="#" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: none;">Contact Support</a>
+
             </p>
+
         </div>
+
         <div style="position: absolute; bottom: 20px; right: 20px; opacity: 0.5; cursor: pointer; font-size: 20px; transition: 0.3s;" onclick="openAdmin()" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">⚙️ Admin</div>
+
     </div>
+
+
 
     <div id="debugLog" style="background: #dc2626; color: white; padding: 15px; position: fixed; top: 0; left: 0; width: 100%; z-index: 999999; display: none; font-family: monospace; font-size: 14px;">
+
         <strong>System Error:</strong> <span id="debugText"></span>
+
     </div>
+
+
 
     <div class="notice-bar" id="noticeBar">
+
         <marquee id="marqueeText" scrollamount="5"></marquee>
+
     </div>
 
+
+
     <nav class="navbar">
+
         <div class="nav-left">
+
             <div class="menu-icon" onclick="openMenu()">&equiv;</div>
+
             <div class="brand" id="siteBrand" onclick="emergencyLogoTap()">
+
                 <div>STAR <span>TV</span></div>
+
             </div>
+
         </div>
+
         <input type="text" id="homeSearch" class="search-box" placeholder="Search Channels..." onkeyup="renderFrontend()">
+
     </nav>
 
+
+
     <div class="container">
+
         <div class="player-box">
+
             <div class="player-wrap">
+
                 <video id="tvPlayer" controls autoplay></video>
+
             </div>
+
             <div class="now-playing">
+
                 <h2 id="nowTitle" style="font-size: 18px; font-weight: 700;">
+
                     <span class="live-dot">&bull;</span> Select a Channel
+
                 </h2>
+
                 <div style="display: flex; gap: 10px; align-items: center;">
+
                     <button onclick="refreshCurrentStream()" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">🔄 Reload</button>
+
                     <div id="fakeViewers" style="display:none; font-size: 12px; color: var(--green); font-weight: 700; background: rgba(16, 185, 129, 0.1); padding: 5px 10px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3);">
+
                         👁 <span id="viewerCount">0</span> Watching
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
+
 
         <div class="recent-bar" id="recentBar" style="display:none;">
+
             <span style="font-size: 12px; color: var(--muted); align-self: center; white-space: nowrap; font-weight: 700;">Recent:</span>
+
             <div id="recentChips" style="display: flex; gap: 8px; overflow-x: auto;"></div>
+
         </div>
 
+
+
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+
             <h3 style="font-size: 20px; font-weight: 800; letter-spacing: 0.5px;">Explore Channels</h3>
+
         </div>
+
+
 
         <div class="category-tabs" id="categoryTabs"></div>
 
+
+
         <div class="grid" id="channelGrid">Loading channels...</div>
 
+
+
         <div id="offlineSection" style="display: none; margin-top: 50px;">
+
             <h3 style="font-size: 18px; margin-bottom: 18px; color: var(--red); display: flex; align-items: center; font-weight: 800;">
+
                 <span style="font-size: 12px; background: rgba(239,68,68,0.15); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.3); margin-right: 10px;">OFFLINE</span> 
+
                 Currently Unavailable
+
             </h3>
+
             <div class="grid" id="offlineGrid"></div>
+
         </div>
+
     </div>
+
+
 
     <div class="admin-overlay" id="menuOverlay">
+
         <div class="admin-panel" style="max-width: 400px; padding: 30px;">
+
             <div class="admin-header">
+
                 <h2 style="font-weight: 800;">Menu</h2>
+
                 <div class="close-btn" onclick="closeMenu()">&times;</div>
+
             </div>
+
             <div class="admin-section" style="text-align: center; border: none; background: transparent;">
+
                 <h3 style="margin-bottom: 15px; color: var(--primary); font-size: 18px;">Customer Profile</h3>
+
                 <p style="color: var(--gold); font-size: 16px; font-weight: 700; margin-bottom: 15px;" id="menuCustomerName">User</p>
+
                 <p style="color: var(--muted); font-size: 14px; margin-bottom: 10px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px;">Email: <span id="displayEmail" style="color:#fff; font-weight: 600;"></span></p>
+
                 <p style="color: var(--muted); font-size: 14px; margin-bottom: 10px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px;">Phone: <span id="displayPhone" style="color:#fff; font-weight: 600;"></span></p>
+
                 <div style="display:flex; gap:10px; margin-bottom: 25px; margin-top:15px;">
+
                     <a id="btnTelegram" href="#" target="_blank" class="admin-btn" style="background:#0088cc; font-size:12px; display:none;">Telegram</a>
+
                     <a id="btnWhatsapp" href="#" target="_blank" class="admin-btn" style="background:#25D366; font-size:12px; display:none;">WhatsApp</a>
+
                 </div>
+
             </div>
+
             <button class="admin-btn" style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--red); color: var(--red); margin-bottom: 10px;" onclick="customerLogout()">Logout Subscription</button>
+
             <button class="admin-btn" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text);" onclick="closeMenu(); openAdmin();">Admin Dashboard</button>
+
         </div>
+
     </div>
+
+
 
     <div class="admin-overlay" id="adminOverlay">
+
         <div class="admin-panel">
+
             
+
             <div id="loginView">
+
                 <div class="admin-header">
+
                     <h2 style="font-weight: 800;">Admin Authentication</h2>
+
                     <div class="close-btn" onclick="closeAdmin()">&times;</div>
+
                 </div>
+
                 <input type="text" id="adminUser" class="admin-input" placeholder="Enter Username">
+
                 <input type="password" id="adminPass" class="admin-input" placeholder="Enter Password">
+
                 <button class="admin-btn" style="margin-top: 10px;" onclick="checkLogin()">Secure Login</button>
+
             </div>
+
+
 
             <div id="dashboardView">
+
                 <div class="admin-header">
+
                     <h2 style="font-weight: 800;">Admin Dashboard</h2>
+
                     <div class="close-btn" onclick="closeAdmin()">&times;</div>
+
                 </div>
+
+
 
                 <div class="stats-box">
+
                     <div class="stat"><span id="statTotal">0</span><div>Total Channels</div></div>
+
                     <div class="stat"><span id="statOnline" style="color:var(--green)">0</span><div>Active Live</div></div>
+
                     <div class="stat"><span id="statUsers" style="color:var(--gold)">0</span><div>Active Users</div></div>
+
                 </div>
+
+
 
                 <div class="admin-section" style="border-color: var(--gold);">
+
                     <h3 style="margin-bottom: 10px; color: var(--gold);">Customer Subscriptions</h3>
+
                     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+
                         <input type="text" id="newCustomerName" class="admin-input" style="margin-bottom:0;" placeholder="Customer Name">
+
                         <button class="admin-btn" style="width: 140px; background: var(--gold); color: #000;" onclick="generateCustomerPIN()">Generate PIN</button>
+
                     </div>
+
                     <div class="admin-ch-list" id="adminUserList" style="max-height: 250px;"></div>
+
                 </div>
 
+
+
                 <div class="admin-section">
+
                     <h3 id="formTitle" style="margin-bottom: 15px;">Add / Edit Single Channel</h3>
+
                     <input type="hidden" id="editKey">
+
                     <input type="text" id="chName" class="admin-input" placeholder="Enter Channel Name">
+
                     <select id="chCat" class="admin-input"></select>
+
                     <input type="text" id="chUrl" class="admin-input" placeholder="Stream URL (.m3u8)">
-                    <input type="text" id="chLogo" class="admin-input" placeholder="Channel Logo Image URL (https://... .png/.jpg)">
+
+                    <input type="text" id="chLogo" class="admin-input" placeholder="Channel Logo Image URL (Optional)">
+
                     <label class="checkbox-wrap">
+
                         <input type="checkbox" id="chPremium"> Mark as VIP / Premium Channel
+
                     </label>
+
                     <button class="admin-btn" id="saveBtn" onclick="saveChannel()">+ Add Channel</button>
+
                 </div>
+
+
 
                 <div class="admin-section" style="border-color: #8b5cf6;">
+
                     <h3 style="margin-bottom: 10px; color: #8b5cf6;">Bulk M3U Playlist Importer</h3>
+
                     <textarea id="m3uInput" class="admin-input" style="height: 100px; resize: vertical; font-family: monospace; font-size:12px;" placeholder="#EXTM3U..."></textarea>
+
                     <button class="admin-btn" style="background:#8b5cf6;" onclick="importM3UText()">Import M3U Channels</button>
+
                 </div>
 
+
+
                 <div class="admin-section">
+
                     <h3 style="margin-bottom: 15px;">Manage Categories</h3>
+
                     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+
                         <input type="text" id="newCatName" class="admin-input" style="margin-bottom:0;" placeholder="New Category Name">
+
                         <button class="admin-btn" style="width: 120px; background: var(--green);" onclick="addCategory()">Add</button>
+
                     </div>
+
                     <div class="admin-ch-list" id="adminCatList" style="max-height: 180px;"></div>
+
                 </div>
 
+
+
                 <div class="admin-section">
+
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+
                         <h3>Database Management</h3>
+
                         <input type="text" id="adminSearch" class="search-box" style="width: 160px; padding: 6px 12px;" placeholder="Search..." onkeyup="renderAdminList()">
+
                     </div>
+
                     <div class="admin-ch-list" id="adminChList"></div>
+
                     <div class="btn-row" style="margin-top:15px;">
+
                         <button class="admin-btn admin-btn-half" style="background:#0284c7;" onclick="exportData()">Export</button>
+
                         <button class="admin-btn admin-btn-half" style="background:#d97706; position: relative;">
+
                             Import<input type="file" id="importFile" accept=".json" onchange="importData(event)" style="opacity: 0; position: absolute; top:0; left:0; width:100%; height:100%; cursor: pointer;">
+
                         </button>
+
                     </div>
+
                     <button class="admin-btn" style="background:var(--red); margin-top:12px;" onclick="clearAllChannels()">Delete All Channels</button>
+
                 </div>
 
+
+
                 <div class="admin-section">
+
                     <h3 style="margin-bottom: 15px;">Site Appearance & Theme</h3>
+
                     <input type="color" id="themeColor" value="#3b82f6" style="height: 35px; width: 60px; border:none; background:transparent; cursor:pointer; margin-bottom:12px;" onchange="updateTheme()">
+
                     <input type="text" id="adminSiteLogo" class="admin-input" placeholder="Logo URL">
+
                     <input type="text" id="adminBgImage" class="admin-input" placeholder="Background Image URL">
+
                     <input type="text" id="adminNotice" class="admin-input" placeholder="Marquee Notice">
+
                     <button class="admin-btn" style="background:#8b5cf6;" onclick="updateAppearance()">Save Appearance</button>
+
                 </div>
 
+
+
                 <div class="admin-section">
+
                     <h3 style="margin-bottom: 15px;">Contact & Social Links</h3>
+
                     <input type="email" id="adminContactEmail" class="admin-input" placeholder="Email">
+
                     <input type="text" id="adminContactPhone" class="admin-input" placeholder="Phone">
+
                     <input type="text" id="adminTelegram" class="admin-input" placeholder="Telegram Link">
+
                     <input type="text" id="adminWhatsapp" class="admin-input" placeholder="WhatsApp Link">
+
                     <button class="admin-btn" style="background:#f59e0b;" onclick="updateContact()">Save Contact Info</button>
+
                 </div>
 
+
+
                 <div class="admin-section">
+
                     <h3 style="margin-bottom: 10px;">Security Credentials</h3>
+
+                    <input type="text" id="newAdminUser" class="admin-input" placeholder="New Username">
+
                     <input type="password" id="newAdminPass" class="admin-input" placeholder="New Password">
-                    <button class="admin-btn" style="background:var(--green);" onclick="changeCredentials()">Update Password</button>
+
+                    <button class="admin-btn" style="background:var(--green);" onclick="changeCredentials()">Update Credentials</button>
+
                 </div>
+
+
 
                 <div class="admin-section" style="border-color: var(--red); background: rgba(239, 68, 68, 0.05);">
+
                     <h3 style="margin-bottom: 10px; color: var(--red);">System Recovery</h3>
+
                     <div class="btn-row">
+
                         <button class="admin-btn admin-btn-half" style="background:#059669;" onclick="restoreEmergencyBackup()">Auto-Restore</button>
+
                         <button class="admin-btn admin-btn-half" style="background:#dc2626;" onclick="hardFactoryReset()">Factory Reset</button>
+
                     </div>
+
                 </div>
 
+
+
             </div>
+
         </div>
+
     </div>
 
+
+
+    <!-- Firebase SDK Modules with Database URL -->
+
     <script type="module">
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+
         import { getDatabase, ref, set, get, onValue, remove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
+
+
         const firebaseConfig = {
+
             apiKey: "AIzaSyBO6CylWZx5aMdafKQ8c6Pl-V7vAz9o4GY",
+
             authDomain: "star-tv-d029f.firebaseapp.com",
+
             databaseURL: "https://star-tv-d029f-default-rtdb.firebaseio.com",
+
             projectId: "star-tv-d029f",
+
             storageBucket: "star-tv-d029f.firebasestorage.app",
+
             messagingSenderId: "928025188965",
+
             appId: "1:928025188965:web:b744ea8329d8248fab848c"
+
         };
+
+
 
         const app = initializeApp(firebaseConfig);
+
         const db = getDatabase(app);
 
+
+
         window.windowHls = null;
+
         window.currentCategory = "All";
+
         window.viewerInterval = null;
+
         window.currentPlayingUrl = "";
+
         
+
         window.favorites = [];
+
         window.recentlyPlayed = [];
+
         try {
+
             window.favorites = JSON.parse(localStorage.getItem('startv_favorites') || "[]");
+
             window.recentlyPlayed = JSON.parse(localStorage.getItem('startv_recent') || "[]");
+
         } catch(e) {}
 
-        window.getDeviceId = function() {
-            try {
-                var id = localStorage.getItem('startv_device_id');
-                if (!id) {
-                    id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 10);
-                    localStorage.setItem('startv_device_id', id);
-                }
-                return id;
-            } catch(e) {
-                return 'dev_fallback_' + Math.random().toString(36).substr(2, 8);
-            }
-        };
+
 
         window.isAdminSession = false;
+
         try {
+
             window.isAdminSession = sessionStorage.getItem("admin_logged_in") === "true";
+
         } catch(e) {}
+
         
+
         window.DEFAULT_CHANNELS = { 
+
             "ch_1": { 
+
                 name: "Aaj Tak HD", 
+
                 category: "News", 
+
                 url: "https://feeds.intoday.in/aajtak/api/aajtaktv/master.m3u8", 
+
                 isOffline: false, 
+
                 logo: "", 
+
                 isPremium: true 
+
             } 
+
         };
+
         
-        // ===== नया Username और Password यहाँ सेट है =====
+
         window.settings = { 
-            admin_username: "staradmin", 
-            admin_password: "Star@TV2026", 
+
+            admin_username: "admin", 
+
+            admin_password: "admin123", 
+
             notice: "Welcome to Star TV!", 
+
             theme_color: "#3b82f6", 
+
             site_logo: "", 
+
             bg_image: "", 
+
             categories: ["News", "Sports", "Movies", "Entertainment", "Kids", "Bangla"], 
+
             contact: { 
+
                 email: "support@startv.com", 
+
                 phone: "+91 0000000000", 
+
                 telegram: "", 
+
                 whatsapp: "" 
+
             } 
+
         };
+
         
+
         window.allData = {};
+
         window.allUsers = {};
 
+
+
         function initApp() { 
+
             try { 
+
                 onValue(ref(db, 'channels'), (snapshot) => {
+
                     const data = snapshot.val();
+
                     if (data) {
+
                         window.allData = data;
+
                     } else {
+
                         window.allData = JSON.parse(JSON.stringify(window.DEFAULT_CHANNELS));
+
                         set(ref(db, 'channels'), window.allData);
+
                     }
+
                     updateStats(); 
+
                     renderCategoriesUI();
+
                     renderFrontend(); 
+
                     renderAdminList(); 
+
                 });
+
+
 
                 onValue(ref(db, 'users'), (snapshot) => {
+
                     const data = snapshot.val();
+
                     window.allUsers = data || {};
+
                     renderUserList(); 
+
                     updateStats();
-                    checkCustomerAuth();
+
                 });
+
+
 
                 onValue(ref(db, 'settings'), (snapshot) => {
+
                     const data = snapshot.val();
+
                     if (data) {
-                        // पुराना data मर्ज करो लेकिन Username और Password हमेशा नया रखो
+
                         window.settings = Object.assign({}, window.settings, data);
-                        window.settings.admin_username = "staradmin";
-                        window.settings.admin_password = "Star@TV2026";
+
                     } else {
+
                         set(ref(db, 'settings'), window.settings);
+
                     }
+
                     applySettings();
+
                     renderCategoriesUI();
+
                 });
 
+
+
                 renderRecentBar(); 
+
                 checkCustomerAuth(); 
+
             } catch(e) { 
+
                 window.allData = JSON.parse(JSON.stringify(window.DEFAULT_CHANNELS)); 
+
                 renderCategoriesUI(); 
+
                 renderFrontend(); 
+
             } 
+
         }
+
+
 
         window.saveLocalData = function() { 
+
             try { 
+
                 set(ref(db, 'channels'), window.allData);
+
                 set(ref(db, 'users'), window.allUsers);
+
                 localStorage.setItem('startv_favorites', JSON.stringify(window.favorites)); 
+
                 localStorage.setItem('startv_recent', JSON.stringify(window.recentlyPlayed)); 
+
             } catch(e) {} 
+
         };
+
+
 
         window.saveSettings = function() { 
+
             try { 
-                // हमेशा नया username/password सेव करो
-                window.settings.admin_username = "staradmin";
-                window.settings.admin_password = "Star@TV2026";
+
                 set(ref(db, 'settings'), window.settings);
+
             } catch(e) {} 
+
         };
+
+
 
         window.applySettings = function() { 
+
             var noticeBar = document.getElementById('noticeBar');
+
             var marqueeText = document.getElementById('marqueeText'); 
+
             
+
             if(noticeBar && marqueeText) { 
+
                 if(window.settings.notice) { 
+
                     marqueeText.innerText = window.settings.notice; 
+
                     noticeBar.style.display = 'block'; 
+
                 } else { 
+
                     noticeBar.style.display = 'none'; 
+
                 } 
+
             } 
+
             
+
             var dEmail = document.getElementById('displayEmail');
+
             var dPhone = document.getElementById('displayPhone'); 
+
             
+
             if(dEmail) dEmail.innerText = window.settings.contact.email; 
+
             if(dPhone) dPhone.innerText = window.settings.contact.phone; 
+
             
+
             var btnTele = document.getElementById('btnTelegram'); 
+
             if(btnTele) { 
+
                 if(window.settings.contact.telegram) { 
+
                     btnTele.href = window.settings.contact.telegram; 
+
                     btnTele.style.display = 'inline-block'; 
+
                 } else { 
+
                     btnTele.style.display = 'none'; 
+
                 } 
+
             } 
+
             
+
             var btnWa = document.getElementById('btnWhatsapp');
+
             var subBtn = document.getElementById('getSubscriptionBtn'); 
+
             if(btnWa && subBtn) { 
+
                 if(window.settings.contact.whatsapp) { 
+
                     btnWa.href = window.settings.contact.whatsapp; 
+
                     btnWa.style.display = 'inline-block'; 
+
                     subBtn.href = window.settings.contact.whatsapp; 
+
                 } else { 
+
                     btnWa.style.display = 'none'; 
+
                 } 
+
             } 
+
             
+
             document.documentElement.style.setProperty('--primary', window.settings.theme_color); 
+
             
+
             if(window.settings.bg_image) { 
+
                 document.body.style.backgroundImage = "url('" + window.settings.bg_image + "')"; 
+
             } else { 
+
                 document.body.style.backgroundImage = "radial-gradient(circle at 50% -20%, #1e293b, var(--bg))"; 
+
             } 
+
             
+
             var brandDiv = document.getElementById('siteBrand'); 
+
             if (brandDiv) { 
+
                 if (window.settings.site_logo && window.settings.site_logo.trim() !== "") { 
-                    brandDiv.innerHTML = '<img src="' + window.settings.site_logo + '" style="height: 38px; object-fit: contain; max-width: 160px;" onerror="this.onerror=null;this.parentNode.innerHTML=\'<div>STAR <span>TV</span></div>\';">'; 
+
+                    brandDiv.innerHTML = '<img src="' + window.settings.site_logo + '" style="height: 38px; object-fit: contain;">'; 
+
                 } else { 
+
                     brandDiv.innerHTML = '<div>STAR <span>TV</span></div>'; 
+
                 } 
+
             } 
+
         };
+
+
 
         window.checkCustomerAuth = function() { 
+
             var lockScreen = document.getElementById("customerLockScreen"); 
+
             if (!lockScreen) return; 
+
             
+
             if (window.isAdminSession) { 
+
                 lockScreen.style.display = "none"; 
+
                 return; 
+
             } 
+
             
+
             var savedPin = null;
+
             try {
+
                 savedPin = localStorage.getItem("startv_customer_pin");
+
             } catch(e) {}
 
+
+
             if (savedPin && window.allUsers[savedPin]) { 
+
                 var user = window.allUsers[savedPin];
+
                 var errBox = document.getElementById('lockErrorMsg');
+
                 var welcomeText = document.getElementById('lockWelcomeText'); 
-                var currentDevice = window.getDeviceId();
+
                 
+
                 if(welcomeText) welcomeText.innerText = "Welcome back, " + user.name + "!"; 
+
                 
+
                 if (!user.active || Date.now() > user.expiry) { 
+
                     if(errBox) { 
+
                         errBox.innerText = !user.active ? "Account blocked." : "Subscription expired."; 
+
                         errBox.style.display = "block"; 
+
                     } 
+
                     try { localStorage.removeItem("startv_customer_pin"); } catch(e) {}
+
                     lockScreen.style.display = "flex"; 
-                } else if (user.deviceId && user.deviceId !== currentDevice) {
-                    if(errBox) { 
-                        errBox.innerText = "Already logged in on another device. Contact admin to unlock."; 
-                        errBox.style.display = "block"; 
-                    } 
-                    try { localStorage.removeItem("startv_customer_pin"); } catch(e) {}
-                    lockScreen.style.display = "flex"; 
+
                 } else { 
-                    if (!user.deviceId) {
-                        window.allUsers[savedPin].deviceId = currentDevice;
-                        window.saveLocalData();
-                    }
+
                     lockScreen.style.display = "none"; 
+
                     var menuName = document.getElementById('menuCustomerName'); 
+
                     if(menuName) menuName.innerText = "User: " + user.name; 
+
                 } 
+
             } else { 
+
                 lockScreen.style.display = "flex"; 
+
             } 
+
         };
+
+
 
         window.verifyCustomerPin = function() { 
+
             var inputPin = document.getElementById("customerPinInput").value.trim();
+
             var errMsg = document.getElementById('lockErrorMsg'); 
+
             
+
             if(inputPin === window.settings.admin_password) { 
+
                 try { sessionStorage.setItem("admin_logged_in", "true"); } catch(e) {}
+
                 window.isAdminSession = true; 
+
                 document.getElementById("customerLockScreen").style.display = "none"; 
+
                 return; 
+
             } 
+
             
+
             if(!inputPin || !window.allUsers[inputPin] || !window.allUsers[inputPin].active || Date.now() > window.allUsers[inputPin].expiry) { 
+
                 if(errMsg) { 
+
                     errMsg.innerText = "Invalid or Expired PIN."; 
+
                     errMsg.style.display = "block"; 
+
                 } 
+
                 return; 
+
             } 
+
             
-            var user = window.allUsers[inputPin];
-            var currentDevice = window.getDeviceId();
-            
-            if (user.deviceId && user.deviceId !== currentDevice) {
-                if(errMsg) { 
-                    errMsg.innerText = "Already logged in on another device. Contact admin to unlock."; 
-                    errMsg.style.display = "block"; 
-                } 
-                return; 
-            } 
-            
-            window.allUsers[inputPin].deviceId = currentDevice;
-            window.saveLocalData();
-            
+
             try { localStorage.setItem("startv_customer_pin", inputPin); } catch(e) {}
+
             document.getElementById("customerLockScreen").style.display = "none"; 
+
             
+
             var menuName = document.getElementById('menuCustomerName'); 
-            if(menuName) menuName.innerText = "User: " + user.name; 
+
+            if(menuName) menuName.innerText = "User: " + window.allUsers[inputPin].name; 
+
         };
+
+
 
         window.customerLogout = function() { 
+
             if(confirm("Logout subscription?")) { 
+
                 try {
-                    var pin = localStorage.getItem("startv_customer_pin");
-                    if (pin && window.allUsers[pin]) {
-                        delete window.allUsers[pin].deviceId;
-                        window.saveLocalData();
-                    }
+
                     localStorage.removeItem("startv_customer_pin"); 
+
                     sessionStorage.removeItem("admin_logged_in"); 
+
                 } catch(e) {}
+
                 window.location.reload(); 
+
             } 
+
         };
+
+
 
         window.generateCustomerPIN = function() { 
+
             var nameInput = document.getElementById('newCustomerName');
+
             var name = nameInput ? nameInput.value.trim() : ""; 
+
             
+
             if(!name) return alert("Enter customer name."); 
+
             
+
             var newPin = Math.floor(100000 + Math.random() * 900000).toString();
+
             var thirtyDays = Date.now() + (30 * 24 * 60 * 60 * 1000); 
+
             
+
             window.allUsers[newPin] = { 
+
                 name: name, 
+
                 expiry: thirtyDays, 
+
                 active: true, 
+
                 created: Date.now() 
+
             }; 
+
             
+
             window.saveLocalData(); 
+
             window.renderUserList(); 
+
             window.updateStats(); 
+
             
+
             if(nameInput) nameInput.value = ""; 
+
             alert("New PIN Generated: " + newPin); 
+
         };
+
+
 
         window.renderUserList = function() { 
+
             var list = document.getElementById('adminUserList'); 
+
             if(!list) return; 
+
             list.innerHTML = ""; 
+
             var count = 0; 
+
             
+
             Object.keys(window.allUsers).forEach(function(pin) { 
+
                 var user = window.allUsers[pin];
+
                 var daysLeft = Math.ceil((user.expiry - Date.now()) / (1000 * 60 * 60 * 24));
+
                 var isExp = daysLeft <= 0; 
+
                 
+
                 if(user.active && !isExp) count++; 
+
                 
-                var deviceStatus = user.deviceId 
-                    ? '<span style="color:var(--gold);">🔒 Device Locked</span>' 
-                    : '<span style="color:var(--green);">🔓 Free</span>';
+
                 var aItem = document.createElement('div'); 
+
                 aItem.className = 'admin-ch-item'; 
+
                 aItem.style.borderLeft = user.active && !isExp ? "4px solid var(--green)" : "4px solid var(--red)"; 
-                aItem.innerHTML = '<div><div style="font-size:14px; font-weight:700;">' + user.name + ' [' + pin + ']</div><div style="font-size:11px; color:var(--muted);">' + (isExp ? 'Expired' : daysLeft + ' days left') + ' · ' + deviceStatus + '</div></div><div class="ch-actions"><button style="background:'+ (user.active ? '#d97706' : '#10b981') +'" onclick="toggleUserStatus(\'' + pin + '\')">' + (user.active ? 'Block' : 'Unblock') + '</button>' + (user.deviceId ? '<button style="background:#8b5cf6;" onclick="clearUserDevice(\'' + pin + '\')">Unlock Device</button>' : '') + '<button class="btn-del" onclick="deleteUser(\'' + pin + '\')">Del</button></div>'; 
+
+                aItem.innerHTML = '<div><div style="font-size:14px; font-weight:700;">' + user.name + ' [' + pin + ']</div><div style="font-size:11px; color:var(--muted);">' + (isExp ? 'Expired' : daysLeft + ' days left') + '</div></div><div class="ch-actions"><button style="background:'+ (user.active ? '#d97706' : '#10b981') +'" onclick="toggleUserStatus(\'' + pin + '\')">' + (user.active ? 'Block' : 'Unblock') + '</button><button class="btn-del" onclick="deleteUser(\'' + pin + '\')">Del</button></div>'; 
+
                 list.appendChild(aItem); 
+
             }); 
+
             
+
             var statUsers = document.getElementById('statUsers'); 
+
             if(statUsers) statUsers.innerText = count; 
+
         };
 
-        window.clearUserDevice = function(pin) {
-            if (!window.allUsers[pin]) return;
-            if (confirm("Unlock this PIN so it can be used on a new device?")) {
-                delete window.allUsers[pin].deviceId;
-                window.saveLocalData();
-                window.renderUserList();
-                alert("Device unlocked. User can now login on a new device.");
-            }
-        };
+
 
         window.toggleUserStatus = function(pin) { 
+
             window.allUsers[pin].active = !window.allUsers[pin].active; 
+
             window.saveLocalData(); 
+
             window.renderUserList(); 
+
         };
+
+
 
         window.deleteUser = function(pin) { 
+
             if(confirm("Delete this user?")) { 
+
                 delete window.allUsers[pin]; 
+
                 window.saveLocalData(); 
+
                 window.renderUserList(); 
+
                 window.updateStats(); 
+
             } 
+
         };
+
+
 
         window.renderCategoriesUI = function() { 
+
             var tabsContainer = document.getElementById("categoryTabs"); 
+
             if(tabsContainer) { 
+
                 var tabsHTML = '<button class="cat-btn ' + (window.currentCategory === 'All' ? 'active' : '') + '" onclick="setCategory(\'All\', this)">All</button><button class="cat-btn ' + (window.currentCategory === 'Favorites' ? 'active' : '') + '" onclick="setCategory(\'Favorites\', this)">⭐ Favorites</button>'; 
+
                 window.settings.categories.forEach(function(cat) { 
+
                     tabsHTML += '<button class="cat-btn ' + (window.currentCategory === cat ? 'active' : '') + '" onclick="setCategory(\'' + cat + '\', this)">' + cat + '</button>'; 
+
                 }); 
+
                 tabsContainer.innerHTML = tabsHTML; 
+
             } 
+
             
+
             var selectCat = document.getElementById("chCat"); 
+
             if(selectCat) { 
+
                 var selectHTML = '<option value="" disabled selected>Select Category</option>'; 
+
                 window.settings.categories.forEach(function(cat) { 
+
                     selectHTML += '<option value="' + cat + '">' + cat + '</option>'; 
+
                 }); 
+
                 selectCat.innerHTML = selectHTML; 
+
             } 
+
             
+
             var catList = document.getElementById("adminCatList"); 
+
             if(catList) { 
+
                 var listHTML = ""; 
+
                 window.settings.categories.forEach(function(cat, index) { 
+
                     listHTML += '<div class="admin-ch-item"><div>' + cat + '</div><div class="ch-actions"><button class="btn-del" onclick="deleteCategory(' + index + ')">Delete</button></div></div>'; 
+
                 }); 
+
                 catList.innerHTML = listHTML; 
+
             } 
+
         };
+
+
 
         window.addCategory = function() { 
+
             var valInput = document.getElementById("newCatName");
+
             var val = valInput ? valInput.value.trim() : ""; 
+
             if(!val || window.settings.categories.includes(val)) return alert("Invalid or existing category."); 
+
             
+
             window.settings.categories.push(val); 
+
             if(valInput) valInput.value = ""; 
+
             window.saveSettings(); 
+
             window.renderCategoriesUI(); 
+
         };
+
+
 
         window.deleteCategory = function(index) { 
+
             if(confirm("Delete category?")) { 
+
                 window.settings.categories.splice(index, 1); 
+
                 window.saveSettings(); 
+
                 window.renderCategoriesUI(); 
+
             } 
+
         };
+
+
 
         window.updateStats = function() { 
+
             var total = 0, online = 0, offline = 0; 
+
             Object.keys(window.allData || {}).forEach(function(k) { 
+
                 if(window.allData[k]) { 
+
                     total++; 
+
                     if(window.allData[k].isOffline) offline++; else online++; 
+
                 } 
+
             }); 
+
             var sTotal = document.getElementById('statTotal');
+
             var sOnline = document.getElementById('statOnline'); 
+
             if(sTotal) sTotal.innerText = total; 
+
             if(sOnline) sOnline.innerText = online; 
+
         };
+
+
 
         window.setCategory = function(cat, btn) { 
+
             window.currentCategory = cat; 
+
             document.querySelectorAll('.cat-btn').forEach(function(b) { 
+
                 b.classList.remove('active'); 
+
             }); 
+
             if(btn) btn.classList.add('active'); 
+
             window.renderFrontend(); 
+
         };
+
+
 
         window.toggleFavorite = function(key, event) { 
+
             event.stopPropagation(); 
+
             var idx = window.favorites.indexOf(key); 
+
             if(idx > -1) window.favorites.splice(idx, 1); 
+
             else window.favorites.push(key); 
+
             window.saveLocalData(); 
+
             window.renderFrontend(); 
+
         };
+
+
 
         window.renderRecentBar = function() { 
+
             var bar = document.getElementById("recentBar");
+
             var chips = document.getElementById("recentChips"); 
+
             if(!bar || !chips || window.recentlyPlayed.length === 0) { 
+
                 if(bar) bar.style.display = 'none'; 
+
                 return; 
+
             } 
+
             bar.style.display = 'flex'; 
+
             chips.innerHTML = ""; 
+
             window.recentlyPlayed.forEach(function(key) { 
+
                 if(window.allData[key]) { 
+
                     var chip = document.createElement('div'); 
+
                     chip.className = "recent-chip"; 
+
                     chip.innerText = window.allData[key].name; 
+
                     chip.onclick = function() { window.playChannel(window.allData[key], key); }; 
+
                     chips.appendChild(chip); 
+
                 } 
+
             }); 
+
         };
+
+
 
         window.renderFrontend = function() { 
+
             var grid = document.getElementById("channelGrid");
+
             var offlineGrid = document.getElementById("offlineGrid");
+
             var offlineSection = document.getElementById("offlineSection");
+
             var searchInput = document.getElementById("homeSearch");
+
             var query = searchInput ? searchInput.value.toLowerCase() : ""; 
+
             
+
             if(!grid) return; 
+
             grid.innerHTML = ""; 
+
             if(offlineGrid) offlineGrid.innerHTML = ""; 
+
             
+
             var hasActive = false, hasOffline = false; 
+
             
+
             Object.keys(window.allData || {}).forEach(function(key) { 
+
                 var ch = window.allData[key]; 
+
                 if(!ch) return; 
+
                 
+
                 if(ch.name.toLowerCase().includes(query) && (window.currentCategory === "All" || (window.currentCategory === "Favorites" ? window.favorites.includes(key) : ch.category === window.currentCategory))) { 
+
                     var isFav = window.favorites.includes(key);
+
                     var card = document.createElement('div'); 
+
                     card.className = "card " + (ch.isOffline ? 'offline' : '') + (ch.isPremium ? ' premium' : ''); 
+
                     
+
                     card.onclick = function() { 
+
                         if(!ch.isOffline) window.playChannel(ch, key); 
+
                     }; 
+
                     
-                    var logoHtml = ch.logo 
-                        ? '<img src="' + ch.logo + '" onerror="this.onerror=null;this.classList.add(\'broken\');this.parentNode.querySelector(\'.logo-fallback\').style.display=\'flex\';"><span class="logo-fallback" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:14px;font-weight:800;padding:0 10px;text-transform:uppercase;text-align:center;z-index:1;">' + ch.name.substring(0,14) + '</span>' 
-                        : '<span>' + ch.name.substring(0,14) + '</span>';
-                    card.innerHTML = '<div class="banner">' + (ch.isPremium ? '<div class="vip-badge">VIP</div>' : '') + logoHtml + (ch.isOffline ? '<div class="offline-badge">OFF</div>' : '') + '</div><div class="info"><div class="name">' + ch.name + '</div><button class="fav-btn ' + (isFav ? 'active' : '') + '" onclick="toggleFavorite(\'' + key + '\', event)">' + (isFav ? '★' : '☆') + '</button></div>'; 
+
+                    card.innerHTML = '<div class="banner">' + (ch.isPremium ? '<div class="vip-badge">VIP</div>' : '') + (ch.logo ? '<img src="' + ch.logo + '">' : '<span>' + ch.name.substring(0,14) + '</span>') + (ch.isOffline ? '<div class="offline-badge">OFF</div>' : '') + '</div><div class="info"><div class="name">' + ch.name + '</div><button class="fav-btn ' + (isFav ? 'active' : '') + '" onclick="toggleFavorite(\'' + key + '\', event)">' + (isFav ? '★' : '☆') + '</button></div>'; 
+
                     
+
                     if(ch.isOffline) { 
+
                         if(offlineGrid) offlineGrid.appendChild(card); 
+
                         hasOffline = true; 
+
                     } else { 
+
                         grid.appendChild(card); 
+
                         hasActive = true; 
+
                     } 
+
                 } 
+
             }); 
+
             if(offlineSection) offlineSection.style.display = hasOffline ? 'block' : 'none'; 
+
         };
+
+
 
         window.renderAdminList = function() { 
+
             var list = document.getElementById("adminChList");
+
             var searchInput = document.getElementById("adminSearch");
+
             var query = searchInput ? searchInput.value.toLowerCase() : ""; 
+
             if(!list) return; 
+
             list.innerHTML = ""; 
+
             
+
             Object.keys(window.allData || {}).forEach(function(key) { 
+
                 var ch = window.allData[key]; 
+
                 if(ch && ch.name && ch.name.toLowerCase().includes(query)) { 
+
                     var item = document.createElement('div'); 
+
                     item.className = 'admin-ch-item'; 
+
                     item.innerHTML = '<div><strong>' + ch.name + '</strong> <span style="font-size:11px; color:var(--muted);">(' + ch.category + ')</span></div><div class="ch-actions"><button class="btn-top" onclick="moveChannelTop(\'' + key + '\')">Top</button><button class="btn-edit" onclick="editChannel(\'' + key + '\')">Edit</button><button class="btn-off" onclick="toggleOffline(\'' + key + '\')">' + (ch.isOffline ? 'On' : 'Off') + '</button><button class="btn-del" onclick="deleteChannel(\'' + key + '\')">Del</button></div>'; 
+
                     list.appendChild(item); 
+
                 } 
+
             }); 
+
         };
+
+
 
         window.saveChannel = function() { 
+
             var editKey = document.getElementById('editKey');
+
             var chName = document.getElementById('chName');
+
             var chCat = document.getElementById('chCat');
+
             var chUrl = document.getElementById('chUrl');
+
             var chLogo = document.getElementById('chLogo');
+
             var chPremium = document.getElementById('chPremium');
+
+
 
             var key = editKey ? editKey.value : "";
+
             var name = chName ? chName.value.trim() : "";
+
             var cat = chCat ? chCat.value : "";
+
             var url = chUrl ? chUrl.value.trim() : "";
+
             var logo = chLogo ? chLogo.value.trim() : "";
+
             var prem = chPremium ? chPremium.checked : false; 
+
             
+
             if(!name || !url) return alert("Name and URL required."); 
+
             if(!key || !window.allData[key]) key = "ch_" + Date.now(); 
+
             
+
             window.allData[key] = { name: name, category: cat, url: url, logo: logo, isOffline: false, isPremium: prem }; 
+
             window.saveLocalData(); 
+
             window.updateStats(); 
+
             window.renderFrontend(); 
+
             window.renderAdminList(); 
+
             
+
             if(editKey) editKey.value = ""; 
+
             if(chName) chName.value = ""; 
+
             if(chUrl) chUrl.value = ""; 
+
             if(chLogo) chLogo.value = ""; 
+
             if(chPremium) chPremium.checked = false; 
+
             
+
             var formTitle = document.getElementById('formTitle');
+
             var saveBtn = document.getElementById('saveBtn');
+
             if(formTitle) formTitle.innerText = "Add / Edit Single Channel";
+
             if(saveBtn) saveBtn.innerText = "+ Add Channel";
 
+
+
             alert("Channel Saved Successfully!"); 
+
         };
+
+
 
         window.editChannel = function(key) { 
+
             var ch = window.allData[key]; 
+
             if(!ch) return; 
+
             
+
             var editKey = document.getElementById('editKey');
+
             var chName = document.getElementById('chName');
+
             var chCat = document.getElementById('chCat');
+
             var chUrl = document.getElementById('chUrl');
+
             var chLogo = document.getElementById('chLogo');
+
             var chPremium = document.getElementById('chPremium');
+
             var formTitle = document.getElementById('formTitle');
+
             var saveBtn = document.getElementById('saveBtn');
 
+
+
             if(editKey) editKey.value = key; 
+
             if(chName) chName.value = ch.name; 
+
             if(chCat) chCat.value = ch.category; 
+
             if(chUrl) chUrl.value = ch.url; 
+
             if(chLogo) chLogo.value = ch.logo || ""; 
+
             if(chPremium) chPremium.checked = ch.isPremium || false; 
+
             if(formTitle) formTitle.innerText = "Edit Channel"; 
+
             if(saveBtn) saveBtn.innerText = "Update Channel"; 
+
         };
+
+
 
         window.moveChannelTop = function(key) { 
+
             var temp = {}; 
+
             temp[key] = window.allData[key]; 
+
             for(var k in window.allData) { 
+
                 if(k !== key) temp[k] = window.allData[k]; 
+
             } 
+
             window.allData = temp; 
+
             window.saveLocalData(); 
+
             window.renderFrontend(); 
+
             window.renderAdminList(); 
+
         };
+
+
 
         window.importM3UText = function() { 
+
             var m3uInput = document.getElementById('m3uInput');
+
             var text = m3uInput ? m3uInput.value : ""; 
+
             if(!text) return alert("Paste M3U text."); 
+
             
+
             var lines = text.split('\n');
+
             var count = 0, name = "", logo = "", cat = "Entertainment"; 
+
             
+
             lines.forEach(function(line) { 
+
                 line = line.trim(); 
+
                 if(line.startsWith('#EXTINF')) { 
+
                     var lMatch = line.match(/tvg-logo="([^"]+)"/);
+
                     var cMatch = line.match(/group-title="([^"]+)"/); 
+
                     if(lMatch) logo = lMatch[1]; 
+
                     if(cMatch) cat = cMatch[1]; 
+
                     var parts = line.split(','); 
+
                     name = parts[parts.length-1].trim(); 
+
                 } else if(line.startsWith('http')) { 
+
                     if(name && line) { 
+
                         window.allData["ch_" + Date.now() + Math.floor(Math.random()*1000)] = { 
+
                             name: name, category: cat, url: line, logo: logo, isOffline: false, isPremium: false 
+
                         }; 
+
                         count++; name = ""; logo = ""; 
+
                     } 
+
                 } 
+
             }); 
+
             if(count > 0) { 
+
                 window.saveLocalData(); window.updateStats(); window.renderFrontend(); window.renderAdminList(); alert(count + " channels imported!"); 
+
             } else {
+
                 alert("No valid links found.");
+
             }
+
         };
+
+
 
         window.deleteChannel = function(key) { 
+
             if(confirm("Delete channel?")) { 
+
                 delete window.allData[key]; window.saveLocalData(); window.updateStats(); window.renderFrontend(); window.renderAdminList(); 
+
             } 
+
         };
+
+
 
         window.toggleOffline = function(key) { 
+
             window.allData[key].isOffline = !window.allData[key].isOffline; 
+
             window.saveLocalData(); window.updateStats(); window.renderFrontend(); window.renderAdminList(); 
+
         };
+
+
 
         window.clearAllChannels = function() { 
+
             if(confirm("Clear all channels?")) { 
+
                 window.allData = {}; window.saveLocalData(); window.updateStats(); window.renderFrontend(); window.renderAdminList(); 
+
             } 
+
         };
+
+
 
         window.exportData = function() { 
+
             var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ channels: window.allData, users: window.allUsers, settings: window.settings })); 
+
             var node = document.createElement('a'); 
+
             node.setAttribute("href", dataStr); 
+
             node.setAttribute("download", "startv_backup.json"); 
+
             document.body.appendChild(node); 
+
             node.click(); 
+
             node.remove(); 
+
         };
+
+
 
         window.importData = function(event) { 
+
             var file = event.target.files[0]; 
+
             if(!file) return; 
+
             var reader = new FileReader(); 
+
             reader.onload = function(e) { 
+
                 try { 
+
                     var obj = JSON.parse(e.target.result); 
+
                     if(obj.channels) window.allData = obj.channels; 
+
                     if(obj.users) window.allUsers = obj.users; 
+
                     window.saveLocalData(); window.updateStats(); window.renderFrontend(); window.renderAdminList(); window.renderUserList(); alert("Imported!"); 
+
                 } catch(err) { 
+
                     alert("Invalid file format"); 
+
                 } 
+
             }; 
+
             reader.readAsText(file); 
+
         };
+
+
 
         window.updateTheme = function() { 
+
             var themeColorInput = document.getElementById('themeColor');
+
             if(themeColorInput) window.settings.theme_color = themeColorInput.value; 
+
         };
+
+
 
         window.updateAppearance = function() { 
+
             var n = document.getElementById('adminNotice');
+
             var l = document.getElementById('adminSiteLogo');
+
             var bg = document.getElementById('adminBgImage');
+
             if(n) window.settings.notice = n.value; 
+
             if(l) window.settings.site_logo = l.value; 
+
             if(bg) window.settings.bg_image = bg.value; 
+
             window.saveSettings(); window.applySettings(); alert("Appearance Updated!"); 
+
         };
+
+
 
         window.updateContact = function() { 
+
             var em = document.getElementById('adminContactEmail');
+
             var ph = document.getElementById('adminContactPhone');
+
             var tel = document.getElementById('adminTelegram');
+
             var wa = document.getElementById('adminWhatsapp');
+
             if(em) window.settings.contact.email = em.value; 
+
             if(ph) window.settings.contact.phone = ph.value; 
+
             if(tel) window.settings.contact.telegram = tel.value; 
+
             if(wa) window.settings.contact.whatsapp = wa.value; 
+
             window.saveSettings(); window.applySettings(); alert("Contact Info Updated!"); 
+
         };
+
+
 
         window.changeCredentials = function() { 
+
+            var uInput = document.getElementById('newAdminUser');
+
             var pInput = document.getElementById('newAdminPass');
+
+            var u = uInput ? uInput.value.trim() : "";
+
             var p = pInput ? pInput.value.trim() : ""; 
-            if(!p) return alert("Please enter a new password."); 
-            window.settings.admin_password = p; 
-            window.saveSettings(); 
-            if(pInput) pInput.value = "";
-            alert("Password updated successfully!"); 
+
+            if(u) window.settings.admin_username = u; 
+
+            if(p) window.settings.admin_password = p; 
+
+            window.saveSettings(); alert("Credentials changed!"); 
+
         };
+
+
 
         window.hardFactoryReset = function() { 
+
             if(confirm("Reset everything? This will wipe all data.")) { 
+
                 try { localStorage.clear(); } catch(e) {}
+
                 window.location.reload(); 
+
             } 
+
         };
+
+
 
         window.restoreEmergencyBackup = function() { 
+
             alert("Using Firebase Realtime Database cloud backup.");
+
         };
+
+
 
         window.refreshCurrentStream = function() { 
+
             if(window.currentPlayingUrl) { 
+
                 var u = window.currentPlayingUrl; window.currentPlayingUrl = ""; 
+
                 window.playChannel({ name: "Reloading...", url: u }, null); 
+
                 setTimeout(function() { 
+
                     var nowTitle = document.getElementById('nowTitle');
+
                     var titleText = nowTitle ? nowTitle.innerText.replace('• ', '') : "Stream";
+
                     window.playChannel({ name: titleText, url: u }, null); 
+
                 }, 500); 
+
             } 
+
         };
+
+
 
         window.playChannel = function(ch, key) { 
+
             window.currentPlayingUrl = ch.url; 
+
             if(key) { 
+
                 var idx = window.recentlyPlayed.indexOf(key); 
+
                 if(idx > -1) window.recentlyPlayed.splice(idx, 1); 
+
                 window.recentlyPlayed.unshift(key); 
+
                 if(window.recentlyPlayed.length > 5) window.recentlyPlayed.pop(); 
+
                 window.saveLocalData(); window.renderRecentBar(); 
+
             } 
+
             var video = document.getElementById('tvPlayer'); 
+
             var nowTitle = document.getElementById('nowTitle');
+
             if(nowTitle) nowTitle.innerHTML = '<span class="live-dot">&bull;</span> ' + ch.name; 
+
             var fakeViewers = document.getElementById('fakeViewers');
+
             if(fakeViewers) fakeViewers.style.display = 'block'; 
+
             simulateViewers(); 
+
             if (window.windowHls) window.windowHls.destroy(); 
+
             if (typeof Hls !== 'undefined' && Hls.isSupported()) { 
+
                 window.windowHls = new Hls(); window.windowHls.loadSource(ch.url); window.windowHls.attachMedia(video); 
+
                 window.windowHls.on(Hls.Events.MANIFEST_PARSED, function() { video.play(); }); 
+
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) { 
+
                 video.src = ch.url; video.play(); 
+
             } 
+
             window.scrollTo({ top: 0, behavior: "smooth" }); 
+
         };
+
+
 
         function simulateViewers() { 
+
             var base = Math.floor(Math.random() * 500) + 1200; 
+
             var vCount = document.getElementById('viewerCount'); 
+
             if(vCount) vCount.innerText = base; 
+
             if(window.viewerInterval) clearInterval(window.viewerInterval); 
+
             window.viewerInterval = setInterval(function() { 
+
                 var change = Math.floor(Math.random() * 15) - 5; 
+
                 base = base + change; 
+
                 if(vCount) vCount.innerText = base; 
+
             }, 3000); 
+
         }
 
+
+
         var tapCount = 0;
+
         var tapTimer; 
+
         window.emergencyLogoTap = function() { 
+
             tapCount++; clearTimeout(tapTimer); 
+
             if(tapCount >= 5) { 
+
                 if(confirm("Reset site completely?")) { 
+
                     try { localStorage.clear(); } catch(e) {}
+
                     window.location.reload(); 
+
                 } 
+
                 tapCount = 0; 
+
             } 
+
             tapTimer = setTimeout(function(){ tapCount = 0; }, 1500); 
+
         };
+
+
 
         window.openMenu = function() { var m = document.getElementById('menuOverlay'); if(m) m.style.display = 'flex'; };
+
         window.closeMenu = function() { var m = document.getElementById('menuOverlay'); if(m) m.style.display = 'none'; };
+
         window.openAdmin = function() { 
+
             var ao = document.getElementById('adminOverlay');
+
             var lv = document.getElementById('loginView');
+
             var dv = document.getElementById('dashboardView');
+
             if(ao) ao.style.display = 'flex'; 
+
             if(lv) lv.style.display = 'block'; 
+
             if(dv) dv.style.display = 'none'; 
+
         };
+
         window.closeAdmin = function() { 
+
             var ao = document.getElementById('adminOverlay');
+
             if(ao) ao.style.display = 'none'; 
+
             window.checkCustomerAuth(); 
+
         };
+
+
 
         window.checkLogin = function() { 
+
             var userIn = document.getElementById('adminUser');
+
             var passIn = document.getElementById('adminPass');
+
             var userVal = userIn ? userIn.value : "";
+
             var passVal = passIn ? passIn.value : "";
+
             if(userVal === window.settings.admin_username && passVal === window.settings.admin_password) { 
+
                 try { sessionStorage.setItem("admin_logged_in", "true"); } catch(e) {}
+
                 window.isAdminSession = true; 
+
                 var lv = document.getElementById('loginView');
+
                 var dv = document.getElementById('dashboardView');
+
                 if(lv) lv.style.display = 'none'; 
+
                 if(dv) dv.style.display = 'block'; 
+
             } else {
+
                 alert("Login Failed"); 
+
             }
+
         };
 
+
+
         initApp();
+
     </script>
+
 </body>
+
 </html>
