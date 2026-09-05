@@ -1,38 +1,4 @@
-[12:42 am, 05/09/2026] Rahul: <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Star TV - Ultimate Pro Admin Edition</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <style>
-    :root {
-      --bg: #07090e; --surface: rgba(15, 23, 42, 0.75); --surface-card: rgba(19, 29, 51, 0.85);
-      --primary: #3b82f6; --text: #f8fafc; --muted: #94a3b8;
-      --red: #ef4444; --green: #10b981; --gold: #f59e0b; --border: rgba(255, 255, 255, 0.1);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; fon…
-[9:12 am, 05/09/2026] Rahul: <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Star TV - Ultimate Pro Admin Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        :root {
-            --bg: #07090e;
-            --surface: rgba(15, 23, 42, 0.75);
-            --surface-card: rgba(19, 29, 51, 0.85);
-            --primary: #3b82f6;
-            --text: #f8fafc;
-            --muted: #94a3b8;
-            --red: #ef4444;
-            --green: #10b981;
-            --gold: #f5…
-[9:17 am, 05/09/2026] Rahul: <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -54,7 +20,7 @@
     .navbar { background: rgba(7, 9, 14, 0.85); backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 100; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
     .nav-left { display: flex; align-items: center; gap: 15px; }
     .menu-icon { font-size: 24px; cursor: pointer; color: var(--text); }
-    .brand { display: flex; align-items: center; gap: 12px; font-size: 19px; font-weight: 800; cursor: pointer; user-select: none; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 19px; font-weight: 800; }
     .brand span { color: var(--primary); }
     
     .search-box { padding: 8px 15px; border-radius: 20px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: #fff; outline: none; font-size: 13px; width: 100%; max-width: 250px; }
@@ -74,13 +40,13 @@
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
     .card { background: var(--surface-card); border-radius: 14px; overflow: hidden; cursor: pointer; border: 1px solid var(--border); position: relative; transition: 0.2s; }
     .card:hover { border-color: var(--primary); transform: translateY(-3px); }
-    .banner { height: 95px; display: flex; align-items: center; justify-content: center; background: #1e3a8a; overflow: hidden; position: relative; }
+    .banner { height: 95px; display: flex; align-items: center; justify-content: center; background: #1e3a8a; }
     .banner span { font-size: 13px; font-weight: 800; padding: 0 10px; text-transform: uppercase; text-align: center;}
     .info { padding: 12px 14px; }
     .name { font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .cat-label { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
-    .offline-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.8); color: var(--red); font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: bold; border: 1px solid var(--red); z-index: 2; }
-    .card.offline { opacity: 0.5; pointer-events: none; filter: grayscale(80%); } 
+    .offline-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.8); color: var(--red); font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: bold; border: 1px solid var(--red); }
+    .card.offline { opacity: 0.5; pointer-events: none; }
 
     .admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 10px; backdrop-filter: blur(5px); }
     .admin-panel { background: var(--surface); width: 100%; max-width: 650px; border-radius: 16px; padding: 24px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
@@ -130,8 +96,7 @@
   <nav class="navbar">
     <div class="nav-left">
       <div class="menu-icon" onclick="openMenu()">&equiv;</div>
-      <!-- MAIN SITE LOGO ID ADDED HERE -->
-      <div class="brand" id="siteBrand" onclick="emergencyLogoTap()"><div>STAR <span>TV</span></div></div>
+      <div class="brand"><div>STAR <span>TV</span></div></div>
     </div>
     <input type="text" id="homeSearch" class="search-box" placeholder="Search Channels..." onkeyup="renderFrontend()">
   </nav>
@@ -159,15 +124,6 @@
     </div>
 
     <div class="grid" id="channelGrid">Loading channels...</div>
-
-    <div id="offlineSection" style="display: none; margin-top: 40px;">
-      <h3 style="font-size: 18px; margin-bottom: 15px; color: var(--red); display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 12px; background: rgba(239,68,68,0.2); padding: 4px 8px; border-radius: 4px;">OFFLINE</span> 
-        Currently Unavailable
-      </h3>
-      <div class="grid" id="offlineGrid"></div>
-    </div>
-
   </div>
 
   <div class="admin-overlay" id="menuOverlay">
@@ -214,7 +170,6 @@
             <option value="Kids">Kids</option><option value="Bangla">Bangla</option>
           </select>
           <input type="text" id="chUrl" class="admin-input" placeholder="Stream URL (.m3u8)">
-          <input type="text" id="chLogo" class="admin-input" placeholder="Channel Logo Image URL (Optional)">
           <button class="admin-btn" id="saveBtn" onclick="saveChannel()">+ Add Channel</button>
         </div>
 
@@ -225,35 +180,20 @@
           </div>
           <div class="admin-ch-list" id="adminChList"></div>
           
-          <div class="btn-row" style="margin-top:10px;">
+          <div class="btn-row">
             <button class="admin-btn admin-btn-half" style="background:#0284c7;" onclick="exportData()">Export Backup</button>
-            <button class="admin-btn admin-btn-half" style="background:#d97706; position: relative;">
-               Import Backup
-               <input type="file" id="importFile" accept=".json" onchange="importData(event)" style="opacity: 0; position: absolute; top:0; left:0; width:100%; height:100%; cursor: pointer;">
-            </button>
+            <button class="admin-btn admin-btn-half" style="background:#be123c;" onclick="clearAllChannels()">Clear All</button>
           </div>
-          <button class="admin-btn" style="background:var(--surface-card); color:var(--red); border:1px solid var(--red); margin-top:10px;" onclick="cleanOfflineChannels()">Clear All Offline Channels</button>
         </div>
 
         <div class="admin-section">
-          <h3 style="margin-bottom: 10px;">Site Appearance & Notice</h3>
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <label style="font-size: 14px;">Theme Color:</label>
-            <input type="color" id="themeColor" value="#3b82f6" style="height: 35px; width: 60px; border:none; background:transparent; cursor:pointer;" onchange="updateTheme()">
-          </div>
-
-          <!-- NEW: MAIN SITE LOGO UPLOAD -->
-          <input type="text" id="adminSiteLogo" class="admin-input" placeholder="Main Site Logo URL (.jpg, .png) (Optional)">
+          <h3 style="margin-bottom: 10px;">Contact & Announcement</h3>
+          <input type="email" id="adminContactEmail" class="admin-input" placeholder="Contact Email">
+          <input type="text" id="adminContactPhone" class="admin-input" placeholder="Contact Mobile Number">
+          <button class="admin-btn" style="background:#f59e0b; margin-bottom: 15px;" onclick="updateContact()">Update Contact Info</button>
 
           <input type="text" id="adminNotice" class="admin-input" placeholder="Enter message for homepage marquee">
-          <button class="admin-btn" style="background:#8b5cf6;" onclick="updateAppearance()">Save Appearance</button>
-        </div>
-
-        <div class="admin-section">
-            <h3 style="margin-bottom: 10px;">Contact Info</h3>
-            <input type="email" id="adminContactEmail" class="admin-input" placeholder="Contact Email">
-            <input type="text" id="adminContactPhone" class="admin-input" placeholder="Contact Mobile Number">
-            <button class="admin-btn" style="background:#f59e0b;" onclick="updateContact()">Update Contact Info</button>
+          <button class="admin-btn" style="background:#8b5cf6;" onclick="updateNotice()">Update Notice</button>
         </div>
 
         <div class="admin-section">
@@ -263,42 +203,30 @@
           <input type="password" id="newAdminPass" class="admin-input" placeholder="New Admin Password">
           <button class="admin-btn" style="background:var(--green);" onclick="changeCredentials()">Update Credentials</button>
         </div>
-
-        <div class="admin-section" style="border-color: var(--red);">
-          <h3 style="margin-bottom: 10px; color: var(--red);">System Recovery & 100% Backup</h3>
-          <p style="font-size:12px; color:var(--muted); margin-bottom: 10px;">The system automatically saves a 100% emergency backup of your channels whenever you make a change.</p>
-          <div class="btn-row">
-            <button class="admin-btn admin-btn-half" style="background:#059669;" onclick="restoreEmergencyBackup()">Restore Backup</button>
-            <button class="admin-btn admin-btn-half" style="background:#dc2626;" onclick="hardFactoryReset()">Factory Reset</button>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
 
   <script>
-    // Version Bump
-    if (localStorage.getItem("clean_install_v13") !== "true") {
+    if (localStorage.getItem("clean_install_v8") !== "true") {
         localStorage.clear();
-        localStorage.setItem("clean_install_v13", "true");
+        localStorage.setItem("clean_install_v8", "true");
     }
 
     let hls = null;
     let currentCategory = "All";
     
     const DEFAULT_CHANNELS = {
-      "ch_1": { name: "Aaj Tak", category: "News", url: "https://feeds.intoday.in/aajtak/api/aajtaktv/master.m3u8", isOffline: false, logo: "" },
-      "ch_2": { name: "Red Bull TV", category: "Sports", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8", isOffline: false, logo: "" },
-      "ch_3": { name: "NASA TV", category: "Entertainment", url: "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8", isOffline: false, logo: "" }
+      "ch_1": { name: "Aaj Tak", category: "News", url: "https://feeds.intoday.in/aajtak/api/aajtaktv/master.m3u8", isOffline: false },
+      "ch_2": { name: "Red Bull TV", category: "Sports", url: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8", isOffline: false },
+      "ch_3": { name: "NASA TV", category: "Entertainment", url: "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8", isOffline: false },
+      "ch_4": { name: "Big Buck Bunny", category: "Movies", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", isOffline: false }
     };
 
     let settings = {
         admin_username: "admin",
         admin_password: "admin123",
         notice: "Welcome to Star TV! Enjoy Live Streaming.",
-        theme_color: "#3b82f6",
-        site_logo: "", // NEW FIELD FOR MAIN LOGO
         contact: { email: "support@startv.com", phone: "+91 0000000000" }
     };
     let allData = {};
@@ -312,8 +240,6 @@
                     settings.admin_username = parsedSettings.admin_username || "admin";
                     settings.admin_password = parsedSettings.admin_password || "admin123";
                     settings.notice = parsedSettings.notice || "";
-                    settings.theme_color = parsedSettings.theme_color || "#3b82f6";
-                    settings.site_logo = parsedSettings.site_logo || "";
                     if(parsedSettings.contact) {
                        settings.contact.email = parsedSettings.contact.email || "";
                        settings.contact.phone = parsedSettings.contact.phone || "";
@@ -341,35 +267,94 @@
         }
     }
 
-    function saveLocalData() { 
-      localStorage.setItem('startv_channels', JSON.stringify(allData)); 
-      if(Object.keys(allData).length > 0) {
-        localStorage.setItem('startv_emergency_backup_channels', JSON.stringify(allData));
-      }
-    }
-    
-    function saveSettings() { 
-      localStorage.setItem('startv_settings', JSON.stringify(settings)); 
-      localStorage.setItem('startv_emergency_backup_settings', JSON.stringify(settings));
-    }
+    function saveLocalData() { localStorage.setItem('startv_channels', JSON.stringify(allData)); }
+    function saveSettings() { localStorage.setItem('startv_settings', JSON.stringify(settings)); }
 
     function applySettings() {
-        // Notice Logic
         if(settings.notice) { 
             document.getElementById('marqueeText').innerText = settings.notice; 
             document.getElementById('noticeBar').style.display = 'block'; 
         } else { 
             document.getElementById('noticeBar').style.display = 'none'; 
         }
-        
-        // Input Fields Logic
         document.getElementById('displayEmail').innerText = settings.contact.email; 
         document.getElementById('displayPhone').innerText = settings.contact.phone;
         document.getElementById('adminContactEmail').value = settings.contact.email; 
         document.getElementById('adminContactPhone').value = settings.contact.phone;
         document.getElementById('adminNotice').value = settings.notice || "";
-        document.getElementById('adminSiteLogo').value = settings.site_logo || "";
-        document.getElementById('themeColor').value = settings.theme_color || "#3b82f6";
+    }
+
+    function updateStats() {
+      let total = 0, online = 0, offline = 0;
+      Object.keys(allData || {}).forEach(function(k) { 
+        const ch = allData[k];
+        if(ch) { total++; if(ch.isOffline) offline++; else online++; }
+      });
+      document.getElementById('statTotal').innerText = total; 
+      document.getElementById('statOnline').innerText = online; 
+      document.getElementById('statOffline').innerText = offline;
+    }
+
+    function setCategory(cat, btnElement) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(function(btn) { btn.classList.remove('active'); });
+      btnElement.classList.add('active');
+      renderFrontend();
+    }
+
+    function renderFrontend() {
+      const grid = document.getElementById("channelGrid");
+      const searchBox = document.getElementById("homeSearch");
+      const query = searchBox ? searchBox.value.toLowerCase() : "";
+      grid.innerHTML = "";
+      
+      const filteredKeys = Object.keys(allData || {}).filter(function(k) {
+        if(!allData[k]) return false;
+        const matchesQuery = (allData[k].name || "").toLowerCase().includes(query);
+        const matchesCategory = currentCategory === "All" || allData[k].category === currentCategory;
+        return matchesQuery && matchesCategory;
+      });
+
+      if (filteredKeys.length === 0) { 
+          grid.innerHTML = '<div style="color:var(--muted); grid-column: 1/-1;">No channels found.</div>'; 
+          return; 
+      }
+
+      filteredKeys.forEach(function(key) {
+        const ch = allData[key];
+        const card = document.createElement('div');
+        card.className = "card " + (ch.isOffline ? 'offline' : '');
+        card.onclick = function() { if(!ch.isOffline) playChannel(ch); };
         
-        // Apply Theme Color
-        document.documentElement.style.setProperty('--primar
+        let color = "#1e3a8a"; 
+        if(ch.category === "News") color = "#991b1b"; 
+        else if(ch.category === "Sports") color = "#065f46"; 
+        else if(ch.category === "Movies") color = "#581c87";
+        
+        card.innerHTML = 
+          '<div class="banner" style="background:' + color + '">' +
+            '<span>' + (ch.name||"").substring(0,12) + '</span>' +
+            (ch.isOffline ? '<div class="offline-badge">OFFLINE</div>' : '') +
+          '</div>' +
+          '<div class="info">' +
+            '<div class="name">' + ch.name + '</div>' +
+            '<div class="cat-label">' + (ch.category || "General") + '</div>' +
+          '</div>';
+        grid.appendChild(card);
+      });
+    }
+
+    function renderAdminList() {
+      const list = document.getElementById("adminChList");
+      const searchBox = document.getElementById("adminSearch");
+      const query = searchBox ? searchBox.value.toLowerCase() : "";
+      list.innerHTML = "";
+
+      const filteredKeys = Object.keys(allData || {}).filter(function(k) { return (allData[k].name||"").toLowerCase().includes(query); });
+      
+      filteredKeys.forEach(function(key) {
+        const ch = allData[key];
+        const aItem = document.createElement('div');
+        aItem.className = 'admin-ch-item';
+        aItem.innerHTML = 
+          '<div style="font-size:13px; font-weight:bold;">' + ch.name + ' <span style="font-weight:normal; color:#888;">(' + (ch.category || "General") + ')</span></
