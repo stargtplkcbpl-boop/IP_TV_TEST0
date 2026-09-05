@@ -3,127 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Star TV - Live Panel</title>
+    <title>Star TV - Final Control Panel</title>
     <style>
         body { font-family: Arial, sans-serif; background: #0f0f0f; color: #fff; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: #1a1a1a; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.7); }
-        h2, h3 { text-align: center; color: #ff3b30; }
-        .section { background: #262626; padding: 15px; margin: 15px 0; border-radius: 8px; }
-        input, button, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: none; font-size: 16px; box-sizing: border-box; }
-        input, select { background: #333; color: #fff; }
+        .container { max-width: 800px; margin: auto; background: #1a1a1a; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+        h2 { text-align: center; color: #ff3b30; margin-bottom: 25px; }
+        h3 { color: #ff4d4d; border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 0; }
+        .section { background: #262626; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        input, button, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: none; font-size: 16px; box-sizing: border-box; }
+        input, select { background: #333; color: #fff; border: 1px solid #444; }
+        input:focus { outline: none; border-color: #ff3b30; }
         button { background: #e50914; color: #fff; cursor: pointer; font-weight: bold; transition: background 0.3s; }
         button:hover { background: #b20710; }
-        #syncStatus { text-align: center; font-size: 14px; margin-bottom: 15px; color: #00e676; font-weight: bold; }
-        .channel-list { margin-top: 10px; max-height: 200px; overflow-y: auto; }
-        .channel-item { background: #333; padding: 8px 12px; margin: 5px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .channel-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
+        .channel-item { background: #333; padding: 12px 15px; margin: 8px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; }
+        .channel-info { word-break: break-all; margin-right: 10px; }
+        .channel-info span { display: block; font-size: 13px; color: #aaa; margin-top: 3px; }
+        .delete-btn { background: #d32f2f; width: auto; padding: 8px 14px; font-size: 14px; margin: 0; cursor: pointer; }
+        .delete-btn:hover { background: #9a0007; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <h2>Star TV Control Panel</h2>
-        <div id="syncStatus">Connecting to Cloud Sync...</div>
 
         <!-- PIN Management Section -->
         <div class="section">
             <h3>Security PIN Management</h3>
             <input type="password" id="masterPin" placeholder="Enter Access PIN">
-            <button onclick="updatePin()">Save / Update PIN</button>
+            <button onclick="savePin()">Save PIN</button>
         </div>
 
         <!-- Channel Management Section -->
         <div class="section">
             <h3>Channel Management</h3>
-            <input type="text" id="channelName" placeholder="Channel Name">
+            <input type="text" id="channelName" placeholder="Channel Name (e.g., Star Sports)">
             <input type="text" id="channelUrl" placeholder="Stream URL / Link">
-            <button onclick="addChannel()">Add Channel to Cloud</button>
+            <button onclick="addChannel()">Add Channel</button>
             
             <div class="channel-list" id="channelContainer">
-                <!-- Channels will load here dynamically from Firebase -->
+                <!-- Channels will load here dynamically -->
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDKs (Modular) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        // Your Firebase Configuration (Linked to Star TV Project)
-        const firebaseConfig = {
-          apiKey: "AIzaSyBO6CylWZx5aMdafKQ8c6Pl-V7vAz9o4GY",
-          authDomain: "star-tv-d029f.firebaseapp.com",
-          databaseURL: "https://star-tv-d029f-default-rtdb.firebaseio.com/",
-          projectId: "star-tv-d029f",
-          storageBucket: "star-tv-d029f.firebasestorage.app",
-          messagingSenderId: "928025188965",
-          appId: "1:928025188965:web:954974944c478fdeab848c"
+    <script>
+        // Load saved PIN and Channels from LocalStorage on page startup
+        window.onload = function() {
+            const savedPin = localStorage.getItem("star_tv_pin");
+            if (savedPin) {
+                document.getElementById("masterPin").value = savedPin;
+            }
+            renderChannels();
         };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Connection Status Tracker
-        const statusEl = document.getElementById("syncStatus");
-        onValue(ref(db, '.info/connected'), (snap) => {
-            if (snap.val() === true) {
-                statusEl.innerText = "Cloud Sync Active (Connected)";
-                statusEl.style.color = "#00e676";
-            } else {
-                statusEl.innerText = "Offline - Waiting for connection...";
-                statusEl.style.color = "#ff9800";
-            }
-        });
-
-        // 1. Update PIN Function
-        window.updatePin = function() {
-            const pin = document.getElementById("masterPin").value;
+        // Save PIN function
+        function savePin() {
+            const pin = document.getElementById("masterPin").value.trim();
             if (!pin) {
                 alert("Please enter a valid PIN!");
                 return;
             }
-            set(ref(db, 'settings/masterPin'), pin)
-                .then(() => alert("PIN updated successfully across all devices!"))
-                .catch((err) => alert("Error: " + err.message));
-        };
+            localStorage.setItem("star_tv_pin", pin);
+            alert("PIN saved successfully!");
+        }
 
-        // 2. Add Channel Function
-        window.addChannel = function() {
-            const name = document.getElementById("channelName").value;
-            const url = document.getElementById("channelUrl").value;
+        // Add Channel function
+        function addChannel() {
+            const name = document.getElementById("channelName").value.trim();
+            const url = document.getElementById("channelUrl").value.trim();
+            
             if (!name || !url) {
                 alert("Please fill in both channel name and URL!");
                 return;
             }
 
-            const channelsRef = ref(db, 'channels');
-            push(channelsRef, { name, url })
-                .then(() => {
-                    document.getElementById("channelName").value = "";
-                    document.getElementById("channelUrl").value = "";
-                    alert("Channel added to cloud successfully!");
-                })
-                .catch((err) => alert("Error adding channel: " + err.message));
-        };
+            let channels = JSON.parse(localStorage.getItem("star_tv_channels")) || [];
+            channels.push({ name, url });
+            localStorage.setItem("star_tv_channels", JSON.stringify(channels));
 
-        // 3. Real-time Channel Sync Across Devices
-        const channelContainer = document.getElementById("channelContainer");
-        onValue(ref(db, 'channels'), (snapshot) => {
+            // Clear input fields after adding
+            document.getElementById("channelName").value = "";
+            document.getElementById("channelUrl").value = "";
+            renderChannels();
+        }
+
+        // Delete Channel function
+        function deleteChannel(index) {
+            let channels = JSON.parse(localStorage.getItem("star_tv_channels")) || [];
+            channels.splice(index, 1);
+            localStorage.setItem("star_tv_channels", JSON.stringify(channels));
+            renderChannels();
+        }
+
+        // Render Channels list on screen
+        function renderChannels() {
+            const channelContainer = document.getElementById("channelContainer");
             channelContainer.innerHTML = "";
-            const data = snapshot.val();
-            if (data) {
-                Object.keys(data).forEach((key) => {
-                    const channel = data[key];
+            
+            let channels = JSON.parse(localStorage.getItem("star_tv_channels")) || [];
+            
+            if (channels.length > 0) {
+                channels.forEach((channel, index) => {
                     const div = document.createElement("div");
                     div.className = "channel-item";
-                    div.innerHTML = `<span><strong>${channel.name}</strong></span> <span style="font-size:12px; color:#aaa;">Synced</span>`;
+                    div.innerHTML = `
+                        <div class="channel-info">
+                            <strong>${channel.name}</strong>
+                            <span>${channel.url}</span>
+                        </div>
+                        <button class="delete-btn" onclick="deleteChannel(${index})">Delete</button>
+                    `;
                     channelContainer.appendChild(div);
                 });
             } else {
-                channelContainer.innerHTML = "<p style='color:#777; text-align:center;'>No channels found in cloud.</p>";
+                channelContainer.innerHTML = "<p style='color:#777; text-align:center;'>No channels added yet.</p>";
             }
-        });
+        }
     </script>
 </body>
 </html>
