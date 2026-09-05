@@ -1,124 +1,489 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Star TV - Final Control Panel</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Star TV - Ultimate Pro Admin Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #0f0f0f; color: #fff; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: #1a1a1a; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.8); }
-        h2 { text-align: center; color: #ff3b30; margin-bottom: 25px; }
-        h3 { color: #ff4d4d; border-bottom: 1px solid #333; padding-bottom: 8px; margin-top: 0; }
-        .section { background: #262626; padding: 20px; margin: 20px 0; border-radius: 8px; }
-        input, button, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; border: none; font-size: 16px; box-sizing: border-box; }
-        input, select { background: #333; color: #fff; border: 1px solid #444; }
-        input:focus { outline: none; border-color: #ff3b30; }
-        button { background: #e50914; color: #fff; cursor: pointer; font-weight: bold; transition: background 0.3s; }
-        button:hover { background: #b20710; }
-        .channel-list { margin-top: 15px; max-height: 300px; overflow-y: auto; }
-        .channel-item { background: #333; padding: 12px 15px; margin: 8px 0; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #444; }
-        .channel-info { word-break: break-all; margin-right: 10px; }
-        .channel-info span { display: block; font-size: 13px; color: #aaa; margin-top: 3px; }
-        .delete-btn { background: #d32f2f; width: auto; padding: 8px 14px; font-size: 14px; margin: 0; cursor: pointer; }
-        .delete-btn:hover { background: #9a0007; }
+        :root {
+            --bg: #07090e;
+            --surface: rgba(15, 23, 42, 0.75);
+            --surface-card: rgba(19, 29, 51, 0.85);
+            --primary: #3b82f6;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --red: #ef4444;
+            --green: #10b981;
+            --gold: #f59e0b;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 50% -20%, #1e293b, var(--bg));
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 50px;
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+
+        #customerLockScreen {
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 9, 14, 0.95);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .lock-box {
+            background: var(--surface-card);
+            width: 100%;
+            max-width: 400px;
+            padding: 35px 25px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+
+        .lock-box h2 {
+            font-weight: 800;
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .lock-box p {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid var(--border);
+            color: var(--gold);
+            font-size: 24px;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        .pin-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .lock-err {
+            color: var(--red);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .navbar {
+            background: rgba(7, 9, 14, 0.7);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 15px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .brand span {
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .search-box {
+            padding: 9px 18px;
+            border-radius: 25px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            outline: none;
+            font-size: 13px;
+            width: 100%;
+            max-width: 260px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 25px 16px;
+        }
+
+        .player-box {
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
+
+        .player-wrap {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .now-playing {
+            background: var(--surface);
+            padding: 18px 25px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .live-dot {
+            color: var(--red);
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            scrollbar-width: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface-card);
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-6px) scale(1.02);
+        }
+
+        .banner {
+            height: 105px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1e3a8a, #0f172a);
+        }
+
+        .banner span {
+            font-size: 14px;
+            font-weight: 800;
+            padding: 0 10px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .info {
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .name {
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 80%;
+        }
+
+        .admin-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 100000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .admin-panel {
+            background: rgba(15, 23, 42, 0.95);
+            width: 100%;
+            max-width: 700px;
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255,255,255,0.15);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--red);
+            font-weight: bold;
+        }
+
+        .admin-section {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .admin-input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 12px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            color: #fff;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .admin-btn {
+            background: var(--primary);
+            color: #fff;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 700;
+            font-size: 14.5px;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>Star TV Control Panel</h2>
+    <script>
+        (function() {
+            const allowedDomain = window.location.hostname;
+            const trustedDomains = ["stargtplkcbl-boop.github.io", "localhost", "127.0.0.1"];
+            if (!trustedDomains.includes(allowedDomain) && allowedDomain !== "") {
+                document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:20vh;'>Access Denied! Unauthorized Domain Protection.</h1>";
+                throw new Error("Unauthorized domain execution blocked.");
+            }
+        })();
+    </script>
 
-        <!-- PIN Management Section -->
-        <div class="section">
-            <h3>Security PIN Management</h3>
-            <input type="password" id="masterPin" placeholder="Enter Access PIN">
-            <button onclick="savePin()">Save PIN</button>
+    <div id="customerLockScreen">
+        <div class="lock-box">
+            <h2>🔒 Star TV Access</h2>
+            <p>Enter your Access PIN to unlock channels.</p>
+            <div id="lockErrorMsg" class="lock-err">Invalid PIN</div>
+            <input type="password" id="customerPinInput" class="pin-input" placeholder="••••" maxlength="6">
+            <button class="admin-btn" onclick="verifyCustomerPin()">Unlock Panel</button>
+        </div>
+        <div style="position: absolute; bottom: 20px; right: 20px; opacity: 0.5; cursor: pointer; font-size: 16px;" onclick="openAdminModal()">⚙️ Admin Setup</div>
+    </div>
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="brand">STAR <span>TV</span></div>
+        </div>
+        <input type="text" id="homeSearch" class="search-box" placeholder="Search Channels..." onkeyup="renderFrontend()">
+    </nav>
+
+    <div class="container">
+        <div class="player-box">
+            <div class="player-wrap">
+                <video id="tvPlayer" controls autoplay></video>
+            </div>
+            <div class="now-playing">
+                <h2 id="nowTitle" style="font-size: 18px; font-weight: 700;">
+                    <span class="live-dot">&bull;</span> Select a Channel
+                </h2>
+            </div>
         </div>
 
-        <!-- Channel Management Section -->
-        <div class="section">
-            <h3>Channel Management</h3>
-            <input type="text" id="channelName" placeholder="Channel Name (e.g., Star Sports)">
-            <input type="text" id="channelUrl" placeholder="Stream URL / Link">
-            <button onclick="addChannel()">Add Channel</button>
-            
-            <div class="channel-list" id="channelContainer">
-                <!-- Channels will load here dynamically -->
+        <div class="category-tabs" id="categoryTabs"></div>
+        <div class="grid" id="channelGrid">Loading channels...</div>
+    </div>
+
+    <div id="adminModal" class="admin-overlay">
+        <div class="admin-panel">
+            <div class="admin-header">
+                <h3>Admin Control Panel</h3>
+                <div class="close-btn" onclick="closeAdminModal()">&times;</div>
+            </div>
+            <div class="admin-section">
+                <h4>Set Master PIN (For Customers)</h4>
+                <input type="text" id="adminPinInput" class="admin-input" placeholder="Enter new PIN">
+                <button class="admin-btn" onclick="saveAdminPin()">Save PIN</button>
+            </div>
+            <div class="admin-section">
+                <h4>Add Channel</h4>
+                <input type="text" id="newChName" class="admin-input" placeholder="Channel Name">
+                <input type="text" id="newChUrl" class="admin-input" placeholder="Stream URL (.m3u8)">
+                <button class="admin-btn" onclick="addNewChannel()">Add Channel</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Load saved PIN and Channels from LocalStorage on page startup
-        window.onload = function() {
-            const savedPin = localStorage.getItem("star_tv_pin");
-            if (savedPin) {
-                document.getElementById("masterPin").value = savedPin;
-            }
-            renderChannels();
-        };
+        // चैनल्स और मास्टर पिन को सीधे कोड में और लोकल स्टोरेज दोनों में सुरक्षित सेट करना
+        let masterPin = localStorage.getItem('star_tv_pin') || "1234";
 
-        // Save PIN function
-        function savePin() {
-            const pin = document.getElementById("masterPin").value.trim();
-            if (!pin) {
-                alert("Please enter a valid PIN!");
-                return;
-            }
-            localStorage.setItem("star_tv_pin", pin);
-            alert("PIN saved successfully!");
-        }
+        let channels = JSON.parse(localStorage.getItem('star_tv_channels')) || [
+            { name: "Star Sports 1", url: "", category: "Sports" },
+            { name: "Star Plus", url: "", category: "Entertainment" }
+        ];
 
-        // Add Channel function
-        function addChannel() {
-            const name = document.getElementById("channelName").value.trim();
-            const url = document.getElementById("channelUrl").value.trim();
-            
-            if (!name || !url) {
-                alert("Please fill in both channel name and URL!");
-                return;
-            }
-
-            let channels = JSON.parse(localStorage.getItem("star_tv_channels")) || [];
-            channels.push({ name, url });
-            localStorage.setItem("star_tv_channels", JSON.stringify(channels));
-
-            // Clear input fields after adding
-            document.getElementById("channelName").value = "";
-            document.getElementById("channelUrl").value = "";
-            renderChannels();
-        }
-
-        // Delete Channel function
-        function deleteChannel(index) {
-            let channels = JSON.parse(localStorage.getItem("star_tv_channels")) || [];
-            channels.splice(index, 1);
-            localStorage.setItem("star_tv_channels", JSON.stringify(channels));
-            renderChannels();
-        }
-
-        // Render Channels list on screen
-        function renderChannels() {
-            const channelContainer = document.getElementById("channelContainer");
-            channelContainer.innerHTML = "";
-            
-            let channels = JSON.parse(localStorage.getItem("star_tv_channels")) || [];
-            
-            if (channels.length > 0) {
-                channels.forEach((channel, index) => {
-                    const div = document.createElement("div");
-                    div.className = "channel-item";
-                    div.innerHTML = `
-                        <div class="channel-info">
-                            <strong>${channel.name}</strong>
-                            <span>${channel.url}</span>
-                        </div>
-                        <button class="delete-btn" onclick="deleteChannel(${index})">Delete</button>
-                    `;
-                    channelContainer.appendChild(div);
-                });
+        function verifyCustomerPin() {
+            let entered = document.getElementById('customerPinInput').value.trim();
+            // अब यह एडमिन द्वारा सेट किए गए पिन से मिलान करेगा जो हर कस्टमर को दिखेगा
+            if(entered === masterPin) {
+                document.getElementById('customerLockScreen').style.display = 'none';
+                renderFrontend();
             } else {
-                channelContainer.innerHTML = "<p style='color:#777; text-align:center;'>No channels added yet.</p>";
+                document.getElementById('lockErrorMsg').style.display = 'block';
+            }
+        }
+
+        function openAdminModal() {
+            let p = prompt("Enter Admin Password:");
+            if(p === masterPin || p === "admin123") {
+                document.getElementById('adminModal').style.display = 'flex';
+                document.getElementById('adminPinInput').value = masterPin;
+            } else if(p) {
+                alert("Incorrect PIN!");
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        function saveAdminPin() {
+            let newP = document.getElementById('adminPinInput').value.trim();
+            if(newP) {
+                masterPin = newP;
+                localStorage.setItem('star_tv_pin', masterPin);
+                alert("PIN updated successfully! Now customers can use this new PIN to login.");
+                closeAdminModal();
+            }
+        }
+
+        function addNewChannel() {
+            let name = document.getElementById('newChName').value.trim();
+            let url = document.getElementById('newChUrl').value.trim();
+            if(!name || !url) {
+                alert("Please fill both name and URL!");
+                return;
+            }
+            channels.push({ name, url, category: "General" });
+            localStorage.setItem('star_tv_channels', JSON.stringify(channels));
+            document.getElementById('newChName').value = '';
+            document.getElementById('newChUrl').value = '';
+            alert("Channel added successfully!");
+            renderFrontend();
+            closeAdminModal();
+        }
+
+        function renderFrontend() {
+            let grid = document.getElementById('channelGrid');
+            grid.innerHTML = '';
+            if(channels.length === 0) {
+                grid.innerHTML = "<p style='color:#777;'>No channels available.</p>";
+                return;
+            }
+            channels.forEach((ch) => {
+                let card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="banner"><span>${ch.name}</span></div>
+                    <div class="info"><div class="name">${ch.name}</div></div>
+                `;
+                card.onclick = () => playChannel(ch.name, ch.url);
+                grid.appendChild(card);
+            });
+        }
+
+        function playChannel(name, url) {
+            document.getElementById('nowTitle').innerHTML = `<span class="live-dot">&bull;</span> Playing: ${name}`;
+            let video = document.getElementById('tvPlayer');
+            if (url.includes('.m3u8')) {
+                if (Hls.isSupported()) {
+                    let hls = new Hls();
+                    hls.loadSource(url);
+                    hls.attachMedia(video);
+                    video.play();
+                } else {
+                    video.src = url;
+                    video.play();
+                }
+            } else {
+                video.src = url;
+                video.play();
             }
         }
     </script>
