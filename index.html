@@ -227,6 +227,261 @@
         .live-dot {
             color: var(--red);
             display: inline-block;
+            animationLogin Failed आ रहा है क्योंकि **Firebase में पुराना पासवर्ड सेव है**।
+
+कोड में हमने नया पासवर्ड डाला है, लेकिन Firebase Realtime Database में पहले से पुराना settings (`admin` / `admin123`) सेव है। इसलिए नया पासवर्ड काम नहीं कर रहा।
+
+---
+
+### अभी के लिए ये credentials यूज़ करो:
+
+**Username:** `admin`  
+**Password:** `admin123`
+
+---
+
+### अगर आप चाहते हो कि नया पासवर्ड ही चले (`staradmin` / `Star@TV2026`)
+
+तो नीचे दिया गया **फिक्स्ड कोड** यूज़ करो। मैंने कोड में थोड़ा बदलाव किया है ताकि हर बार नया Username और Password फोर्स से सेट हो जाए।
+
+**नया Admin Login:**
+- **Username:** `staradmin`
+- **Password:** `Star@TV2026`
+
+---
+
+नीचे पूरा फिक्स्ड कोड है। इसे कॉपी करके अपनी `index.html` फाइल में पेस्ट कर दो और GitHub पर अपलोड कर दो:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Star TV - Ultimate Pro Admin Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        :root {
+            --bg: #07090e;
+            --surface: rgba(15, 23, 42, 0.75);
+            --surface-card: rgba(19, 29, 51, 0.85);
+            --primary: #3b82f6;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --red: #ef4444;
+            --green: #10b981;
+            --gold: #f59e0b;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 50% -20%, #1e293b, var(--bg));
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 50px;
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            transition: 0.5s;
+        }
+
+        #customerLockScreen {
+            position: fixed;
+            inset: 0;
+            background: rgba(7, 9, 14, 0.95);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .lock-box {
+            background: var(--surface-card);
+            width: 100%;
+            max-width: 400px;
+            padding: 35px 25px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+
+        .lock-box h2 {
+            font-weight: 800;
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .lock-box p {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid var(--border);
+            color: var(--gold);
+            font-size: 24px;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        .pin-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .lock-err {
+            color: var(--red);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .notice-bar {
+            background: linear-gradient(90deg, var(--red), #b91c1c);
+            color: white;
+            padding: 6px 15px;
+            font-size: 13px;
+            font-weight: 600;
+            display: none;
+            box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
+        }
+
+        .navbar {
+            background: rgba(7, 9, 14, 0.7);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 15px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .menu-icon {
+            font-size: 26px;
+            cursor: pointer;
+            color: var(--text);
+            transition: 0.3s;
+        }
+
+        .menu-icon:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 800;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .brand span {
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        .search-box {
+            padding: 9px 18px;
+            border-radius: 25px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.03);
+            color: #fff;
+            outline: none;
+            font-size: 13px;
+            width: 100%;
+            max-width: 260px;
+            transition: 0.3s;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 25px 16px;
+        }
+
+        .player-box {
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+        }
+
+        .player-wrap {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .now-playing {
+            background: var(--surface);
+            padding: 18px 25px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes pulse-red {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .live-dot {
+            color: var(--red);
+            display: inline-block;
             animation: pulse-red 1.5s infinite;
             margin-right: 5px;
         }
@@ -830,7 +1085,6 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Modules with Database URL -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getDatabase, ref, set, get, onValue, remove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
@@ -860,7 +1114,6 @@
             window.recentlyPlayed = JSON.parse(localStorage.getItem('startv_recent') || "[]");
         } catch(e) {}
 
-        // Unique device ID for single-device restriction
         window.getDeviceId = function() {
             try {
                 var id = localStorage.getItem('startv_device_id');
@@ -890,9 +1143,10 @@
             } 
         };
         
+        // ===== नया Username और Password यहाँ सेट है =====
         window.settings = { 
-            admin_username: "admin", 
-            admin_password: "admin123", 
+            admin_username: "staradmin", 
+            admin_password: "Star@TV2026", 
             notice: "Welcome to Star TV!", 
             theme_color: "#3b82f6", 
             site_logo: "", 
@@ -936,7 +1190,10 @@
                 onValue(ref(db, 'settings'), (snapshot) => {
                     const data = snapshot.val();
                     if (data) {
+                        // पुराना data मर्ज करो लेकिन Username और Password हमेशा नया रखो
                         window.settings = Object.assign({}, window.settings, data);
+                        window.settings.admin_username = "staradmin";
+                        window.settings.admin_password = "Star@TV2026";
                     } else {
                         set(ref(db, 'settings'), window.settings);
                     }
@@ -964,6 +1221,9 @@
 
         window.saveSettings = function() { 
             try { 
+                // हमेशा नया username/password सेव करो
+                window.settings.admin_username = "staradmin";
+                window.settings.admin_password = "Star@TV2026";
                 set(ref(db, 'settings'), window.settings);
             } catch(e) {} 
         };
@@ -1057,7 +1317,6 @@
                     try { localStorage.removeItem("startv_customer_pin"); } catch(e) {}
                     lockScreen.style.display = "flex"; 
                 } else if (user.deviceId && user.deviceId !== currentDevice) {
-                    // Already logged in on another device
                     if(errBox) { 
                         errBox.innerText = "Already logged in on another device. Contact admin to unlock."; 
                         errBox.style.display = "block"; 
@@ -1065,7 +1324,6 @@
                     try { localStorage.removeItem("startv_customer_pin"); } catch(e) {}
                     lockScreen.style.display = "flex"; 
                 } else { 
-                    // Bind device if not already bound
                     if (!user.deviceId) {
                         window.allUsers[savedPin].deviceId = currentDevice;
                         window.saveLocalData();
@@ -1101,7 +1359,6 @@
             var user = window.allUsers[inputPin];
             var currentDevice = window.getDeviceId();
             
-            // Single device check
             if (user.deviceId && user.deviceId !== currentDevice) {
                 if(errMsg) { 
                     errMsg.innerText = "Already logged in on another device. Contact admin to unlock."; 
@@ -1110,7 +1367,6 @@
                 return; 
             } 
             
-            // Bind this device to the PIN
             window.allUsers[inputPin].deviceId = currentDevice;
             window.saveLocalData();
             
@@ -1125,7 +1381,6 @@
             if(confirm("Logout subscription?")) { 
                 try {
                     var pin = localStorage.getItem("startv_customer_pin");
-                    // Free the device lock so user can login on another device later
                     if (pin && window.allUsers[pin]) {
                         delete window.allUsers[pin].deviceId;
                         window.saveLocalData();
