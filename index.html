@@ -2654,6 +2654,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
                         यहाँ से panel की health check, safe repair, cloud sync और customer-side performance controls चलाए जा सकते हैं।
                         Remote customer device का browser cache सीधे delete नहीं किया जा सकता, लेकिन refresh/reset signal भेजा जा सकता है।
                     </p>
+                    <div style="padding:8px 10px;margin-bottom:8px;border:1px solid #7f1d1d;border-radius:10px;background:rgba(127,29,29,.12);color:#fecaca;font-size:12px;">📺 Channel database: <b>EMPTY BY DESIGN</b> — अब आप नए channels add कर सकते हैं.</div>
                     <div id="adminFixHealth" style="padding:10px;border:1px solid var(--border);border-radius:10px;background:rgba(0,0,0,.12);margin-bottom:10px;">
                         <b>System status:</b> <span id="adminFixHealthText">Not checked yet.</span>
                     </div>
@@ -2668,6 +2669,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
                     <div class="btn-row">
                         <button class="admin-btn admin-btn-half" style="background:#d97706;" onclick="refreshAdminWorkspace()">🔄 Rebuild Admin UI</button>
                         <button class="admin-btn admin-btn-half" style="background:#64748b;" onclick="resetCustomerFrontendPrefsLocal()">🧹 Reset This Device UI</button>
+                        <button class="admin-btn admin-btn-half" style="background:#991b1b;" onclick="clearAllChannelsPermanently()">🗑️ Clear All Channels</button>
                     </div>
                     <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
                         <h4 style="margin:0 0 8px;color:#7dd3fc;">📱 Customer Lag / Hang Controls</h4>
@@ -2840,54 +2842,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
         // Built-in demo channels. These are added only when the local channel list is empty.
         // Demo streams use a public HLS test stream so the player can be tested without a TV-network feed.
-        window.DEFAULT_CHANNELS = {
-            "ch_1": {
-                name: "Aaj Tak HD",
-                category: "News",
-                url: "https://feeds.intoday.in/aajtak/api/aajtaktv/master.m3u8",
-                isOffline: false,
-                logo: "",
-                isPremium: true
-            },
-            "demo_news": {
-                name: "STAR Demo News",
-                category: "News",
-                url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-                isOffline: false, logo: "", isPremium: false, isDemo: true
-            },
-            "demo_sports": {
-                name: "STAR Demo Sports",
-                category: "Sports",
-                url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-                isOffline: false, logo: "", isPremium: false, isDemo: true
-            },
-            "demo_movies": {
-                name: "STAR Demo Movies",
-                category: "Movies",
-                url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-                isOffline: false, logo: "", isPremium: false, isDemo: true
-            },
-            "demo_ent": {
-                name: "STAR Demo Entertainment",
-                category: "Entertainment",
-                url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-                isOffline: false, logo: "", isPremium: false, isDemo: true
-            },
-            "demo_kids": {
-                name: "STAR Demo Kids",
-                category: "Kids",
-                url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-                isOffline: false, logo: "", isPremium: false, isDemo: true
-            },
-            "demo_bangla": {
-                name: "STAR Demo Bangla",
-                category: "Bangla",
-                url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-                isOffline: false, logo: "", isPremium: false, isDemo: true
-            }
-        };
-
-        
+        window.DEFAULT_CHANNELS = {};
 
         window.settings = { 
             admin_username: "admin", 
@@ -2915,7 +2870,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
             auto_resume: true,
             show_offline_section: true,
             show_toasts: true,
-            auto_offline_on_play_error: true,
+            auto_offline_on_play_error: false,
             auto_m3u_url: '',
             epg_url: '',
             iptv_health_interval: 30,
@@ -2962,7 +2917,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
                 var localOperators = localStorage.getItem('startv_local_operators');
                 var localSettings = localStorage.getItem('startv_local_settings');
                 if (localChannels) window.allData = JSON.parse(localChannels);
-                else window.allData = JSON.parse(JSON.stringify(window.DEFAULT_CHANNELS));
+                else window.allData = {};
                 if (localUsers) window.allUsers = JSON.parse(localUsers);
                 if (localOperators) window.allOperators = JSON.parse(localOperators);
                 try {
@@ -3053,7 +3008,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
                     });
 
                     if (!Object.keys(mergedData).length) {
-                        mergedData = JSON.parse(JSON.stringify(window.DEFAULT_CHANNELS));
+                        mergedData = {};
                         shouldWriteBack = true;
                     }
 
@@ -5126,6 +5081,27 @@ body.light-mode #fakeViewers{color:#64748b!important}
             }catch(e){alert('Local snapshot restore failed: '+(e.message||e));}
         };
 
+        window.clearAllChannelsPermanently=function(){
+            if(!confirm('क्या आप सभी Channels हटाना चाहते हैं? यह action Channels को Local और Firebase दोनों जगह से खाली करेगा. Customers/Operators/Settings सुरक्षित रहेंगे.')) return;
+            try{
+                window.allData={};
+                localStorage.removeItem('startv_local_channels');
+                if(window.firebaseReady&&db){
+                    set(ref(db,'channels'),{}).then(function(){
+                        window.updateStats&&window.updateStats();window.renderCategoriesUI&&window.renderCategoriesUI();window.renderFrontend&&window.renderFrontend();window.updateLiveStatus&&window.updateLiveStatus();window.renderAdminList&&window.renderAdminList();
+                        window.logAdminAction&&window.logAdminAction('Cleared all channels from Local + Firebase');
+                        alert('सभी channels हट गए हैं. अब आप नए channels add कर सकते हैं.');
+                    }).catch(function(e){
+                        localStorage.setItem('startv_local_channels','{}');
+                        alert('Local channels cleared, but Firebase clear failed: '+(e.message||e));
+                    });
+                } else {
+                    window.updateStats&&window.updateStats();window.renderCategoriesUI&&window.renderCategoriesUI();window.renderFrontend&&window.renderFrontend();window.updateLiveStatus&&window.updateLiveStatus();window.renderAdminList&&window.renderAdminList();
+                    alert('सभी local channels हट गए हैं.');
+                }
+            }catch(e){ alert('Channel clear failed: '+(e.message||e)); }
+        };
+
         window.resetCustomerFrontendPrefsLocal=function(){
             if(!confirm('Reset frontend preferences on THIS admin device only?'))return;
             ['startv_home_sort','startv_last_channel','startv_recent_channels','startv_favorites','startv_channel_view','startv_card_size'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});
@@ -6045,6 +6021,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
             window.showStreamStatus('loading', 'Loading stream...');
 
+            if (window._playbackTimer) { try { clearTimeout(window._playbackTimer); } catch(e) {} window._playbackTimer=null; }
             if (window.windowHls) {
                 try { window.windowHls.destroy(); } catch(e) {}
                 window.windowHls = null;
@@ -6053,44 +6030,119 @@ body.light-mode #fakeViewers{color:#64748b!important}
             var qSel = document.getElementById('qualitySelect');
             if (qSel) { qSel.style.display = 'none'; qSel.innerHTML = '<option value="-1">Auto</option>'; }
 
-            if (typeof Hls !== 'undefined' && Hls.isSupported()) { 
-                window.windowHls = new Hls({ enableWorker: true, lowLatencyMode: false, capLevelToPlayerSize: true, maxBufferLength: 5, maxMaxBufferLength: 10, backBufferLength: 2, maxBufferSize: 8*1000*1000, maxBufferHole: 0.8, nudgeOffset: 0.1, nudgeMaxRetry: 1, fragLoadingMaxRetry: 2, manifestLoadingMaxRetry: 2, levelLoadingMaxRetry: 2, startLevel: -1 });
-                window.windowHls.loadSource(ch.url); 
-                window.windowHls.attachMedia(video); 
-                window.windowHls.on(Hls.Events.MANIFEST_PARSED, function(event, data) { 
-                    if (playRequestId !== window._playRequestId) return;
+            if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+                var bufferMode=(window.settings&&window.settings.iptv_buffer_mode)||'balanced';
+                var bufferCfg = bufferMode==='stable'
+                    ? {maxBufferLength:18,maxMaxBufferLength:36,backBufferLength:8,maxBufferSize:24*1000*1000}
+                    : (bufferMode==='low'
+                        ? {maxBufferLength:5,maxMaxBufferLength:12,backBufferLength:3,maxBufferSize:10*1000*1000}
+                        : {maxBufferLength:10,maxMaxBufferLength:22,backBufferLength:5,maxBufferSize:16*1000*1000});
+                var playbackRetryCount=0;
+                var playbackReady=false;
+                var playbackTimer=setTimeout(function(){
+                    if (playRequestId !== window._playRequestId || playbackReady) return;
+                    try {
+                        if (window.windowHls && playbackRetryCount < 2) {
+                            playbackRetryCount++;
+                            window.showStreamStatus('loading','Stream is slow — reconnecting…');
+                            window.windowHls.stopLoad();
+                            setTimeout(function(){
+                                if(playRequestId !== window._playRequestId || !window.windowHls) return;
+                                try { window.windowHls.startLoad(-1); } catch(e) {}
+                            },300);
+                        } else {
+                            window.showStreamStatus('error','Stream is not responding. Tap Reload.');
+                        }
+                    } catch(e) {}
+                }, 25000);
+                window._playbackTimer=playbackTimer;
+                window.windowHls = new Hls(Object.assign({
+                    enableWorker:true,
+                    lowLatencyMode:false,
+                    capLevelToPlayerSize:true,
+                    startLevel:-1,
+                    abrEwmaFastLive:3,
+                    abrEwmaSlowLive:9,
+                    abrBandWidthFactor:0.75,
+                    abrBandWidthUpFactor:0.7,
+                    nudgeOffset:0.2,
+                    nudgeMaxRetry:4,
+                    maxFragLookUpTolerance:0.25,
+                    maxBufferHole:0.8,
+                    manifestLoadingMaxRetry:3,
+                    levelLoadingMaxRetry:4,
+                    fragLoadingMaxRetry:5,
+                    fragLoadingRetryDelay:800,
+                    manifestLoadingRetryDelay:1000,
+                    levelLoadingRetryDelay:1000
+                },bufferCfg));
+                window.windowHls.loadSource(ch.url);
+                window.windowHls.attachMedia(video);
+                var markReady=function(){
+                    if(playRequestId !== window._playRequestId) return;
+                    playbackReady=true;
+                    clearTimeout(playbackTimer);
                     window.hideStreamStatus();
                     window.incrementPlayCount && window.incrementPlayCount(key);
                     window.applyWatermark && window.applyWatermark();
-                    if (qSel && data && data.levels && data.levels.length > 1) {
-                        qSel.innerHTML = '<option value="-1">Auto</option>';
-                        data.levels.forEach(function(level, i) {
-                            var label = level.height ? (level.height + 'p') : ('Level ' + i);
-                            if (level.bitrate) label += ' · ' + Math.round(level.bitrate/1000) + 'k';
-                            qSel.innerHTML += '<option value="' + i + '">' + label + '</option>';
+                };
+                video.addEventListener('playing',markReady,{once:true});
+                video.addEventListener('canplay',function(){ if(playRequestId===window._playRequestId && !playbackReady) window.showStreamStatus('loading','Starting stream…'); });
+                window.windowHls.on(Hls.Events.MANIFEST_PARSED,function(event,data){
+                    if(playRequestId !== window._playRequestId) return;
+                    if(qSel && data && data.levels && data.levels.length > 1){
+                        qSel.innerHTML='<option value="-1">Auto</option>';
+                        data.levels.forEach(function(level,i){
+                            var label=level.height?(level.height+'p'):('Level '+i);
+                            if(level.bitrate) label+=' · '+Math.round(level.bitrate/1000)+'k';
+                            qSel.innerHTML+='<option value="'+i+'">'+label+'</option>';
                         });
-                        qSel.style.display = 'inline-block';
+                        qSel.style.display='inline-block';
                     }
-                    video.play().catch(function(){}); 
-                }); 
-                window.windowHls.on(Hls.Events.ERROR, function(event, data) {
-                    if (playRequestId !== window._playRequestId) return;
-                    if (data.fatal) {
-                        window.showStreamStatus('error', 'Stream failed. Try reload.');
-                        window.markPlaybackFailedOffline(ch, key, (data.type || 'HLS') + ' / ' + (data.details || 'fatal error'));
-                        try { window.windowHls.destroy(); } catch(e) {}
-                        window.windowHls = null;
+                    video.play().catch(function(){
+                        window.showStreamStatus('loading','Tap the player to start playback…');
+                    });
+                });
+                window.windowHls.on(Hls.Events.ERROR,function(event,data){
+                    if(playRequestId !== window._playRequestId || !data) return;
+                    if(data.fatal){
+                        if(data.type===Hls.ErrorTypes.NETWORK_ERROR && playbackRetryCount<3){
+                            playbackRetryCount++;
+                            window.showStreamStatus('loading','Network hiccup — reconnecting…');
+                            try { window.windowHls.startLoad(-1); } catch(e) {}
+                            return;
+                        }
+                        if(data.type===Hls.ErrorTypes.MEDIA_ERROR && playbackRetryCount<3){
+                            playbackRetryCount++;
+                            window.showStreamStatus('loading','Recovering video decoder…');
+                            try { window.windowHls.recoverMediaError(); } catch(e) {}
+                            return;
+                        }
+                        clearTimeout(playbackTimer);
+                        window.showStreamStatus('error','Stream failed after retries. Tap Reload.');
+                        // Do not mark the channel offline for a transient/device playback failure.
                         if (window.settings && window.settings.auto_next_on_fail) {
-                            setTimeout(function(){ window.zapChannel && window.zapChannel(1); }, 1200);
+                            setTimeout(function(){ if(playRequestId===window._playRequestId && window.zapChannel) window.zapChannel(1); },1800);
                         }
                     }
                 });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) { 
-                video.src = ch.url; 
-                video.play().then(function(){ if (playRequestId !== window._playRequestId) return; window.hideStreamStatus(); window.incrementPlayCount && window.incrementPlayCount(key); window.applyWatermark && window.applyWatermark(); }).catch(function(err){ if (playRequestId !== window._playRequestId) return;
-                    window.showStreamStatus('error', 'Playback failed.');
-                    window.markPlaybackFailedOffline(ch, key, (err && err.message) || 'Native playback failed');
-                    if (window.settings && window.settings.auto_next_on_fail) setTimeout(function(){ window.zapChannel && window.zapChannel(1); }, 1200);
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                var nativeReady=false;
+                var nativeTimer=setTimeout(function(){
+                    if(playRequestId!==window._playRequestId || nativeReady) return;
+                    window.showStreamStatus('error','Stream is not responding. Tap Reload.');
+                },25000);
+                video.addEventListener('loadedmetadata',function(){
+                    if(playRequestId!==window._playRequestId)return;
+                    nativeReady=true;clearTimeout(nativeTimer);window.hideStreamStatus();
+                    window.incrementPlayCount&&window.incrementPlayCount(key);window.applyWatermark&&window.applyWatermark();
+                },{once:true});
+                video.src = ch.url;
+                video.play().catch(function(err){
+                    if(playRequestId!==window._playRequestId)return;
+                    window.showStreamStatus('error','Playback failed. Tap Reload.');
+                    // Keep channel active; a single device's decoder/network error is not proof that the URL is offline.
+                    if(window.settings&&window.settings.auto_next_on_fail)setTimeout(function(){window.zapChannel&&window.zapChannel(1);},1800);
                 });
             } else {
                 window.showStreamStatus('error', 'HLS not supported on this device.');
