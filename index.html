@@ -3006,17 +3006,15 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
             try { 
 
-                // Channel sync: do not let an empty/stale Firebase snapshot erase
-                // channels that were just added locally. Pending writes are merged
-                // until Firebase confirms them.
+                // Channel sync: Firebase is the cloud source, but local changes are
+                // reconciled by per-channel updatedAt so a browser refresh cannot make
+                // newly-added channels disappear when the cloud still has an older copy.
                 window._pendingChannelWrites = window._pendingChannelWrites || {};
                 window._channelsFirebaseInitialized = false;
 
                 onValue(ref(db, 'channels'), (snapshot) => {
-
-                    const data = snapshot.val();
-
-                    var remoteData = (data && typeof data === 'object') ? data : {};
+                    var remoteData = snapshot.val();
+                    remoteData = (remoteData && typeof remoteData === 'object') ? remoteData : {};
                     var localData = {};
                     try {
                         var rawLocalChannels = localStorage.getItem('startv_local_channels');
@@ -3026,17 +3024,28 @@ body.light-mode #fakeViewers{color:#64748b!important}
                     var mergedData = Object.assign({}, remoteData);
                     var shouldWriteBack = false;
 
-                    // If Firebase is empty on first load, preserve the user's local
-                    // channel list instead of replacing it with demo channels.
-                    if (!data && Object.keys(localData).length > 0 && !window._channelsFirebaseInitialized) {
-                        mergedData = Object.assign({}, localData);
-                        shouldWriteBack = true;
-                    }
+                    Object.keys(localData).forEach(function(key){
+                        var localCh = localData[key];
+                        if (!localCh || typeof localCh !== 'object') return;
+                        var remoteCh = remoteData[key];
+                        var localUpdated = Number(localCh.updatedAt || localCh.createdAt || 0);
+                        var remoteUpdated = Number(remoteCh && (remoteCh.updatedAt || remoteCh.createdAt) || 0);
 
-                    // Preserve channels that are in the middle of a save. This fixes
-                    // the "Add Channel does nothing" behaviour when Firebase returns
-                    // an older snapshot or the write is temporarily rejected.
-                    Object.keys(window._pendingChannelWrites || {}).forEach(function(key) {
+                        // Keep a locally-created channel if Firebase has no copy yet.
+                        if (!remoteCh) {
+                            mergedData[key] = localCh;
+                            shouldWriteBack = true;
+                            return;
+                        }
+                        // Keep the newer local edit if Firebase still has an older copy.
+                        if (localUpdated > remoteUpdated) {
+                            mergedData[key] = localCh;
+                            shouldWriteBack = true;
+                        }
+                    });
+
+                    // Pending writes always win over an older realtime snapshot.
+                    Object.keys(window._pendingChannelWrites || {}).forEach(function(key){
                         if (window.allData && window.allData[key]) {
                             mergedData[key] = window.allData[key];
                             shouldWriteBack = true;
@@ -3049,24 +3058,27 @@ body.light-mode #fakeViewers{color:#64748b!important}
                     }
 
                     window.allData = mergedData;
+                    try { localStorage.setItem('startv_local_channels', JSON.stringify(window.allData)); } catch(e) {}
 
                     if (shouldWriteBack) {
                         try {
-                            set(ref(db, 'channels'), window.allData).catch(function(err) {
-                                console.warn('Channel sync warning:', err);
+                            set(ref(db, 'channels'), window.allData).then(function(){
+                                window._channelsFirebaseInitialized = true;
+                            }).catch(function(err){
+                                console.warn('Channel cloud reconcile failed:', err);
+                                window.showToast && window.showToast('Channels kept locally; cloud sync failed');
                             });
-                        } catch(e) {}
+                        } catch(e) {
+                            console.warn('Channel cloud reconcile error:', e);
+                        }
                     }
 
                     window._channelsFirebaseInitialized = true;
-
-                    updateStats(); 
+                    updateStats();
                     renderCategoriesUI();
-                    renderFrontend(); window.updateLiveStatus && window.updateLiveStatus(); 
-                    renderAdminList(); 
-
+                    renderFrontend(); window.updateLiveStatus && window.updateLiveStatus();
+                    renderAdminList();
                 });
-
 
 
                 onValue(ref(db, 'users'), (snapshot) => {
@@ -3172,18 +3184,36 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
 
 
-        window.saveLocalData = function() { 
+        window.saveLocalData = function() {
+            var channelSnapshot = window.allData || {};
             try {
-                localStorage.setItem('startv_local_channels', JSON.stringify(window.allData));
-                localStorage.setItem('startv_local_users', JSON.stringify(window.allUsers));
-                localStorage.setItem('startv_local_operators', JSON.stringify(window.allOperators));
-                localStorage.setItem('startv_favorites', JSON.stringify(window.favorites)); 
-                localStorage.setItem('startv_recent', JSON.stringify(window.recentlyPlayed)); 
-            } catch(e) {}
+                localStorage.setItem('startv_local_channels', JSON.stringify(channelSnapshot));
+                localStorage.setItem('startv_local_users', JSON.stringify(window.allUsers || {}));
+                localStorage.setItem('startv_local_operators', JSON.stringify(window.allOperators || {}));
+                localStorage.setItem('startv_favorites', JSON.stringify(window.favorites || []));
+                localStorage.setItem('startv_recent', JSON.stringify(window.recentlyPlayed || []));
+            } catch(e) { console.warn('Local save failed:', e); }
+
             if (window.firebaseReady && db) {
-                try { set(ref(db, 'channels'), window.allData); } catch(e) {}
-                try { set(ref(db, 'users'), window.allUsers); } catch(e) {}
-                try { set(ref(db, 'operators'), window.allOperators); } catch(e) {}
+                // Channel writes are done at the child level. This prevents a
+                // simultaneous old whole-node write from replacing the complete list.
+                try {
+                    Object.keys(channelSnapshot).forEach(function(key){
+                        if (!channelSnapshot[key]) return;
+                        window._pendingChannelWrites = window._pendingChannelWrites || {};
+                        window._pendingChannelWrites[key] = true;
+                        var write = set(ref(db, 'channels/' + key), channelSnapshot[key]);
+                        if (write && typeof write.then === 'function') {
+                            write.then(function(){ delete window._pendingChannelWrites[key]; })
+                                 .catch(function(err){
+                                     console.warn('Channel Firebase save failed:', err);
+                                     window.showToast && window.showToast('Channel saved locally; Firebase sync failed');
+                                 });
+                        }
+                    });
+                } catch(e) { console.warn('Channel Firebase save error:', e); }
+                try { set(ref(db, 'users'), window.allUsers || {}); } catch(e) {}
+                try { set(ref(db, 'operators'), window.allOperators || {}); } catch(e) {}
             }
         };
 
@@ -5324,7 +5354,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
             var noteEl = document.getElementById('chNote');
             var noteVal = noteEl ? noteEl.value.trim() : '';
-            window.allData[key] = Object.assign({}, window.allData[key] || {}, { name: name, category: cat, url: url, logo: logo, epgId: (document.getElementById('chEpgId') ? document.getElementById('chEpgId').value.trim() : ''), note: noteVal, isOffline: false, isPremium: prem, playCount: (window.allData[key] && window.allData[key].playCount) || 0, createdAt: (window.allData[key] && window.allData[key].createdAt) || Date.now() });
+            window.allData[key] = Object.assign({}, window.allData[key] || {}, { name: name, category: cat, url: url, logo: logo, epgId: (document.getElementById('chEpgId') ? document.getElementById('chEpgId').value.trim() : ''), note: noteVal, isOffline: false, isPremium: prem, playCount: (window.allData[key] && window.allData[key].playCount) || 0, createdAt: (window.allData[key] && window.allData[key].createdAt) || Date.now(), updatedAt: Date.now() });
 
             // Mark this channel as pending before saving so an old Firebase
             // snapshot cannot immediately remove it from the admin list.
