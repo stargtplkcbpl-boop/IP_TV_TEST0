@@ -1841,9 +1841,10 @@ body.light-mode #fakeViewers{color:#64748b!important}
     <div class="customer-notice-banner" id="customerNoticeBanner"></div>
 
     <div class="notice-bar" id="noticeBar">
-
-        <marquee id="marqueeText" scrollamount="5"></marquee>
-
+        <div style="display:flex;align-items:center;gap:10px;">
+            <marquee id="marqueeText" scrollamount="5" style="flex:1;"></marquee>
+            <button type="button" onclick="hideTopNotice()" aria-label="Hide notification" title="Hide notification" style="border:0;background:rgba(0,0,0,.22);color:#fff;border-radius:6px;width:30px;height:26px;font-size:18px;line-height:22px;cursor:pointer;flex:0 0 auto;">&times;</button>
+        </div>
     </div>
 
 
@@ -2079,6 +2080,8 @@ body.light-mode #fakeViewers{color:#64748b!important}
                         <button type="button" class="xstar-nav-btn" data-xstar="logs" onclick="xstarShow('logs',this)"><span>📜</span><span class="xstar-label">Logs</span></button>
                         <button type="button" class="xstar-nav-btn" data-xstar="safety" onclick="xstarShow('safety',this)"><span>🛡️</span><span class="xstar-label">Safety</span></button>
                         <button type="button" class="xstar-nav-btn" data-xstar="recovery" onclick="xstarShow('recovery',this)"><span>💥</span><span class="xstar-label">Recovery</span></button>
+                        <div class="xstar-nav-group">Help</div>
+                        <button type="button" class="xstar-nav-btn" data-xstar="help" onclick="xstarShow('help',this)"><span>❓</span><span class="xstar-label">Help</span></button>
                     </nav>
                     <div class="xstar-content" id="xstarContent">
                         <div class="xstar-section active" data-xstar-panel="overview">
@@ -2394,6 +2397,10 @@ body.light-mode #fakeViewers{color:#64748b!important}
                         </div>
                     </div>
 
+                    <div class="checkbox-wrap" style="margin-top:8px;">
+                        <input type="checkbox" id="noticeEnabled" checked>
+                        <label for="noticeEnabled">Show top red notification</label>
+                    </div>
                     <input type="text" id="adminNotice" class="admin-input" placeholder="Marquee Notice">
                     <button class="admin-btn" style="background:#8b5cf6;" onclick="updateAppearance()">Save Appearance</button>
                 </div>
@@ -2647,6 +2654,17 @@ body.light-mode #fakeViewers{color:#64748b!important}
                     </div>
                 </div>
                         </div>
+                        <div class="xstar-section" data-xstar-panel="help">
+                            <div class="admin-section">
+                                <h3 style="margin-bottom:10px;">❓ STAR TV Help</h3>
+                                <div style="font-size:13px;line-height:1.7;color:var(--muted);">
+                                    <p style="margin:0 0 10px;"><b style="color:#fff;">Operator add नहीं हो रहा?</b><br>Operators में username + password भरें और Add Operator दबाएँ. Save के बाद list में operator दिखना चाहिए.</p>
+                                    <p style="margin:0 0 10px;"><b style="color:#fff;">Logo वापस हट/बदल क्यों जाता है?</b><br>अब local save और Firebase sync में latest change की timestamp रखी जाती है, इसलिए पुराना Firebase data नया logo overwrite नहीं करेगा.</p>
+                                    <p style="margin:0 0 10px;"><b style="color:#fff;">लाल Welcome notification बंद करें</b><br>Appearance में “Show top red notification” untick करके Save Appearance करें. ऊपर notification पर <b>×</b> दबाकर भी तुरंत hide कर सकते हैं.</p>
+                                    <p style="margin:0;"><b style="color:#fff;">अगर Firebase offline हो</b><br>Settings, logo और operators पहले local browser में save रहेंगे. Internet/Firebase वापस आने पर sync करने की कोशिश होगी.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2813,6 +2831,8 @@ body.light-mode #fakeViewers{color:#64748b!important}
             admin_username: "admin", 
             admin_password: "admin123", 
             notice: "Welcome to Star TV!", 
+            notice_enabled: true,
+            _updated_at: 0,
             theme_color: "#3b82f6", 
             site_logo: "", 
             bg_image: "", 
@@ -2862,6 +2882,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
         window.allData = {};
         window.allUsers = {};
         window.allOperators = {};
+        window._operatorsUpdatedAt = 0;
         window.isOperatorSession = false;
         window.currentOperatorId = null;
         try {
@@ -2882,7 +2903,21 @@ body.light-mode #fakeViewers{color:#64748b!important}
                 else window.allData = JSON.parse(JSON.stringify(window.DEFAULT_CHANNELS));
                 if (localUsers) window.allUsers = JSON.parse(localUsers);
                 if (localOperators) window.allOperators = JSON.parse(localOperators);
-                if (localSettings) window.settings = Object.assign({}, window.settings, JSON.parse(localSettings));
+                try {
+                    var savedOpStamp = parseInt(localStorage.getItem('startv_local_operators_updated_at') || '0', 10) || 0;
+                    window._operatorsUpdatedAt = savedOpStamp;
+                    if (!savedOpStamp && localOperators) {
+                        window._operatorsUpdatedAt = Date.now();
+                        localStorage.setItem('startv_local_operators_updated_at', String(window._operatorsUpdatedAt));
+                    }
+                } catch(e) {}
+                if (localSettings) {
+                    window.settings = Object.assign({}, window.settings, JSON.parse(localSettings));
+                    if (!window.settings._updated_at) {
+                        window.settings._updated_at = Date.now();
+                        try { localStorage.setItem('startv_local_settings', JSON.stringify(window.settings)); } catch(e) {}
+                    }
+                }
                 try { window.homeSortMode = localStorage.getItem('startv_home_sort') || 'default'; } catch(e) {}
                 window.usersDataReady = true;
                 applySettings();
@@ -2953,7 +2988,25 @@ body.light-mode #fakeViewers{color:#64748b!important}
                 });
 
                 onValue(ref(db, 'operators'), (snapshot) => {
-                    window.allOperators = snapshot.val() || {};
+                    var remoteOperators = snapshot.val() || {};
+                    var remoteStamp = 0;
+                    Object.keys(remoteOperators).forEach(function(id) {
+                        if (remoteOperators[id] && remoteOperators[id].updatedAt) {
+                            remoteStamp = Math.max(remoteStamp, parseInt(remoteOperators[id].updatedAt, 10) || 0);
+                        }
+                    });
+                    var localStamp = Number(window._operatorsUpdatedAt || 0);
+                    // Never let an older/empty Firebase snapshot erase a newer local change.
+                    if (localStamp > remoteStamp) {
+                        window.saveOperators && window.saveOperators();
+                        return;
+                    }
+                    window.allOperators = remoteOperators;
+                    window._operatorsUpdatedAt = remoteStamp || localStamp;
+                    try {
+                        localStorage.setItem('startv_local_operators_updated_at', String(window._operatorsUpdatedAt || 0));
+                        localStorage.setItem('startv_local_operators', JSON.stringify(window.allOperators));
+                    } catch(e) {}
                     window.renderOperatorList && window.renderOperatorList();
                     if (window.isOperatorSession && window.currentOperatorId) {
                         var op = window.allOperators[window.currentOperatorId];
@@ -2964,26 +3017,24 @@ body.light-mode #fakeViewers{color:#64748b!important}
                 });
 
                 onValue(ref(db, 'settings'), (snapshot) => {
-
-                    const data = snapshot.val();
-
-                    if (data) {
-
-                        window.settings = Object.assign({}, window.settings, data);
-
-                    } else {
-
-                        set(ref(db, 'settings'), window.settings);
-
+                    var data = snapshot.val();
+                    var remoteStamp = data ? (parseInt(data._updated_at, 10) || 0) : 0;
+                    var localStamp = Number((window.settings && window.settings._updated_at) || 0);
+                    if (data && localStamp > remoteStamp) {
+                        // Local changes (logo/notice/theme/etc.) are newer; push them instead of reverting them.
+                        window.saveSettings && window.saveSettings();
+                        applySettings();
+                        return;
                     }
-
+                    if (data) {
+                        window.settings = Object.assign({}, window.settings, data);
+                    } else {
+                        window.saveSettings && window.saveSettings();
+                    }
+                    try { localStorage.setItem('startv_local_settings', JSON.stringify(window.settings)); } catch(e) {}
                     applySettings();
-
                     renderCategoriesUI();
-
                 });
-
-
 
                 renderRecentBar(); 
 
@@ -3038,15 +3089,47 @@ body.light-mode #fakeViewers{color:#64748b!important}
         };
 
         window.saveOperators = function() {
-            try { localStorage.setItem('startv_local_operators', JSON.stringify(window.allOperators)); } catch(e) {}
-            if (window.firebaseReady && db) { try { set(ref(db, 'operators'), window.allOperators); } catch(e) {} }
+            var stamp = Date.now();
+            window._operatorsUpdatedAt = stamp;
+            Object.keys(window.allOperators || {}).forEach(function(id) {
+                if (window.allOperators[id] && typeof window.allOperators[id] === 'object') {
+                    window.allOperators[id].updatedAt = stamp;
+                }
+            });
+            try {
+                localStorage.setItem('startv_local_operators', JSON.stringify(window.allOperators));
+                localStorage.setItem('startv_local_operators_updated_at', String(stamp));
+            } catch(e) {}
+            if (window.firebaseReady && db) {
+                try {
+                    return set(ref(db, 'operators'), window.allOperators).catch(function(err) {
+                        console.warn('Operator Firebase save failed:', err);
+                        window.showToast && window.showToast('Operator saved locally; Firebase sync failed');
+                    });
+                } catch(e) {
+                    console.warn('Operator Firebase save error:', e);
+                }
+            }
+            return Promise.resolve();
         };
 
 
 
         window.saveSettings = function() { 
+            window.settings = window.settings || {};
+            window.settings._updated_at = Date.now();
             try { localStorage.setItem('startv_local_settings', JSON.stringify(window.settings)); } catch(e) {}
-            if (window.firebaseReady && db) { try { set(ref(db, 'settings'), window.settings); } catch(e) {} }
+            if (window.firebaseReady && db) {
+                try {
+                    return set(ref(db, 'settings'), window.settings).catch(function(err) {
+                        console.warn('Settings Firebase save failed:', err);
+                        window.showToast && window.showToast('Settings saved locally; Firebase sync failed');
+                    });
+                } catch(e) {
+                    console.warn('Settings Firebase save error:', e);
+                }
+            }
+            return Promise.resolve();
         };
 
 
@@ -3060,20 +3143,18 @@ body.light-mode #fakeViewers{color:#64748b!important}
             
 
             if(noticeBar && marqueeText) { 
-
-                if(window.settings.notice) { 
-
+                var noticeEnabled = window.settings.notice_enabled !== false;
+                if(noticeEnabled && window.settings.notice) { 
                     marqueeText.innerText = window.settings.notice; 
-
                     noticeBar.style.display = 'block'; 
-
                 } else { 
-
                     noticeBar.style.display = 'none'; 
-
                 } 
-
-            } 
+            }
+            var noticeInput = document.getElementById('adminNotice');
+            var noticeToggle = document.getElementById('noticeEnabled');
+            if (noticeInput) noticeInput.value = window.settings.notice || '';
+            if (noticeToggle) noticeToggle.checked = window.settings.notice_enabled !== false;
 
             
 
@@ -4093,6 +4174,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
                 }
             });
             delete window.allOperators[id];
+            window.saveOperators();
             window.saveLocalData();
             window.renderOperatorList();
             window.renderUserList();
@@ -5414,10 +5496,20 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
         window.updateAppearance = function() { 
             var n = document.getElementById('adminNotice');
-            if(n) window.settings.notice = n.value; 
+            var ne = document.getElementById('noticeEnabled');
+            if(n) window.settings.notice = n.value.trim(); 
+            if(ne) window.settings.notice_enabled = !!ne.checked;
             window.saveSettings(); 
             window.applySettings(); 
-            alert("Appearance Updated!"); 
+            window.showToast && window.showToast(window.settings.notice_enabled ? 'Top notification enabled' : 'Top notification hidden');
+        };
+
+        window.hideTopNotice = function() {
+            window.settings.notice_enabled = false;
+            window.saveSettings();
+            window.applySettings();
+            var ne = document.getElementById('noticeEnabled');
+            if (ne) ne.checked = false;
         };
 
 
