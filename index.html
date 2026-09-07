@@ -2080,6 +2080,8 @@ body.light-mode #fakeViewers{color:#64748b!important}
                         <button type="button" class="xstar-nav-btn" data-xstar="logs" onclick="xstarShow('logs',this)"><span>📜</span><span class="xstar-label">Logs</span></button>
                         <button type="button" class="xstar-nav-btn" data-xstar="safety" onclick="xstarShow('safety',this)"><span>🛡️</span><span class="xstar-label">Safety</span></button>
                         <button type="button" class="xstar-nav-btn" data-xstar="recovery" onclick="xstarShow('recovery',this)"><span>💥</span><span class="xstar-label">Recovery</span></button>
+                        <div class="xstar-nav-group">System Fix</div>
+                        <button type="button" class="xstar-nav-btn" data-xstar="fixes" onclick="xstarShow('fixes',this)"><span>🛠️</span><span class="xstar-label">Admin Fix Center</span></button>
                         <div class="xstar-nav-group">Help</div>
                         <button type="button" class="xstar-nav-btn" data-xstar="help" onclick="xstarShow('help',this)"><span>❓</span><span class="xstar-label">Help</span></button>
                     </nav>
@@ -2645,6 +2647,66 @@ body.light-mode #fakeViewers{color:#64748b!important}
                 </div>
 
                         </div>
+                        <div class="xstar-section" data-xstar-panel="fixes">
+                <div class="admin-section" style="border-color:#22c55e;background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(14,165,233,.05));">
+                    <h3 style="margin-bottom:8px;color:#86efac;">🛠️ Admin Fix Center — Total Control & Diagnostics</h3>
+                    <p style="font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:12px;">
+                        यहाँ से panel की health check, safe repair, cloud sync और customer-side performance controls चलाए जा सकते हैं।
+                        Remote customer device का browser cache सीधे delete नहीं किया जा सकता, लेकिन refresh/reset signal भेजा जा सकता है।
+                    </p>
+                    <div id="adminFixHealth" style="padding:10px;border:1px solid var(--border);border-radius:10px;background:rgba(0,0,0,.12);margin-bottom:10px;">
+                        <b>System status:</b> <span id="adminFixHealthText">Not checked yet.</span>
+                    </div>
+                    <div class="btn-row">
+                        <button class="admin-btn admin-btn-half" style="background:#0ea5e9;" onclick="runAdminDiagnostics()">🔎 Full Health Check</button>
+                        <button class="admin-btn admin-btn-half" style="background:#16a34a;" onclick="repairAdminSystem()">🛠️ Safe Auto-Fix</button>
+                    </div>
+                    <div class="btn-row">
+                        <button class="admin-btn admin-btn-half" style="background:#7c3aed;" onclick="syncAdminDataNow()">☁️ Sync All to Firebase</button>
+                        <button class="admin-btn admin-btn-half" style="background:#334155;" onclick="restoreAdminFromLocalSnapshot()">💾 Restore Local Snapshot</button>
+                    </div>
+                    <div class="btn-row">
+                        <button class="admin-btn admin-btn-half" style="background:#d97706;" onclick="refreshAdminWorkspace()">🔄 Rebuild Admin UI</button>
+                        <button class="admin-btn admin-btn-half" style="background:#64748b;" onclick="resetCustomerFrontendPrefsLocal()">🧹 Reset This Device UI</button>
+                    </div>
+                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                        <h4 style="margin:0 0 8px;color:#7dd3fc;">📱 Customer Lag / Hang Controls</h4>
+                        <div class="checkbox-wrap"><input type="checkbox" id="customerPerformanceMode"><label for="customerPerformanceMode">Performance Mode — reduce heavy UI effects</label></div>
+                        <div class="checkbox-wrap"><input type="checkbox" id="customerDisableFakeViewers"><label for="customerDisableFakeViewers">Disable displayed/fake viewer counter</label></div>
+                        <div class="checkbox-wrap"><input type="checkbox" id="customerDisableToasts"><label for="customerDisableToasts">Disable toast notifications</label></div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;">
+                            <div>
+                                <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Buffer mode</label>
+                                <select id="customerBufferMode" class="admin-input" style="margin-bottom:0;">
+                                    <option value="low">Low latency</option>
+                                    <option value="balanced" selected>Balanced</option>
+                                    <option value="stable">Stable / slower start</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;">Auto quality</label>
+                                <select id="customerAutoQuality" class="admin-input" style="margin-bottom:0;">
+                                    <option value="1">ON</option>
+                                    <option value="0">OFF</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="btn-row">
+                            <button class="admin-btn admin-btn-half" style="background:#0284c7;" onclick="saveCustomerPerformanceControls()">💾 Save Performance</button>
+                            <button class="admin-btn admin-btn-half" style="background:#f59e0b;color:#111;" onclick="applyCustomerPerformancePreset()">⚡ Low-Bandwidth Preset</button>
+                        </div>
+                        <div class="btn-row">
+                            <button class="admin-btn admin-btn-half" style="background:#ef4444;" onclick="forceCustomerRefresh()">🔃 Refresh All Customers</button>
+                            <button class="admin-btn admin-btn-half" style="background:#8b5cf6;" onclick="resetCustomerPrefsAndRefresh()">♻️ Reset Customer UI + Refresh</button>
+                        </div>
+                        <div id="customerFixStatus" style="margin-top:8px;font-size:12px;color:var(--muted);"></div>
+                    </div>
+                    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                        <h4 style="margin:0 0 8px;color:#fbbf24;">🧪 Checks</h4>
+                        <div id="adminFixReport" style="font-size:12px;line-height:1.55;color:var(--muted);">Run Full Health Check to inspect the system.</div>
+                    </div>
+                </div>
+                        </div>
                         <div class="xstar-section" data-xstar-panel="recovery">
                 <div class="admin-section" style="border-color: var(--red); background: rgba(239, 68, 68, 0.05);">
                     <h3 style="margin-bottom: 10px; color: var(--red);">System Recovery</h3>
@@ -2944,28 +3006,63 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
             try { 
 
+                // Channel sync: do not let an empty/stale Firebase snapshot erase
+                // channels that were just added locally. Pending writes are merged
+                // until Firebase confirms them.
+                window._pendingChannelWrites = window._pendingChannelWrites || {};
+                window._channelsFirebaseInitialized = false;
+
                 onValue(ref(db, 'channels'), (snapshot) => {
 
                     const data = snapshot.val();
 
-                    if (data) {
+                    var remoteData = (data && typeof data === 'object') ? data : {};
+                    var localData = {};
+                    try {
+                        var rawLocalChannels = localStorage.getItem('startv_local_channels');
+                        if (rawLocalChannels) localData = JSON.parse(rawLocalChannels) || {};
+                    } catch(e) {}
 
-                        window.allData = data;
+                    var mergedData = Object.assign({}, remoteData);
+                    var shouldWriteBack = false;
 
-                    } else {
-
-                        window.allData = JSON.parse(JSON.stringify(window.DEFAULT_CHANNELS));
-
-                        set(ref(db, 'channels'), window.allData);
-
+                    // If Firebase is empty on first load, preserve the user's local
+                    // channel list instead of replacing it with demo channels.
+                    if (!data && Object.keys(localData).length > 0 && !window._channelsFirebaseInitialized) {
+                        mergedData = Object.assign({}, localData);
+                        shouldWriteBack = true;
                     }
 
+                    // Preserve channels that are in the middle of a save. This fixes
+                    // the "Add Channel does nothing" behaviour when Firebase returns
+                    // an older snapshot or the write is temporarily rejected.
+                    Object.keys(window._pendingChannelWrites || {}).forEach(function(key) {
+                        if (window.allData && window.allData[key]) {
+                            mergedData[key] = window.allData[key];
+                            shouldWriteBack = true;
+                        }
+                    });
+
+                    if (!Object.keys(mergedData).length) {
+                        mergedData = JSON.parse(JSON.stringify(window.DEFAULT_CHANNELS));
+                        shouldWriteBack = true;
+                    }
+
+                    window.allData = mergedData;
+
+                    if (shouldWriteBack) {
+                        try {
+                            set(ref(db, 'channels'), window.allData).catch(function(err) {
+                                console.warn('Channel sync warning:', err);
+                            });
+                        } catch(e) {}
+                    }
+
+                    window._channelsFirebaseInitialized = true;
+
                     updateStats(); 
-
                     renderCategoriesUI();
-
                     renderFrontend(); window.updateLiveStatus && window.updateLiveStatus(); 
-
                     renderAdminList(); 
 
                 });
@@ -3028,6 +3125,27 @@ body.light-mode #fakeViewers{color:#64748b!important}
                     }
                     if (data) {
                         window.settings = Object.assign({}, window.settings, data);
+
+                        // Admin Fix Center can request a customer-side soft reload/reset.
+                        if (!window.isAdminSession && !window.isOperatorSession) {
+                            try {
+                                var softKey='startv_customer_soft_reload_seen';
+                                var resetKey='startv_customer_reset_seen';
+                                var softAt=Number(window.settings.customer_soft_reload_at||0);
+                                var resetAt=Number(window.settings.customer_reset_prefs_at||0);
+                                var seenSoft=Number(localStorage.getItem(softKey)||0);
+                                var seenReset=Number(localStorage.getItem(resetKey)||0);
+                                if (softAt>seenSoft) {
+                                    localStorage.setItem(softKey,String(softAt));
+                                    if (resetAt>seenReset) {
+                                        ['startv_home_sort','startv_last_channel','startv_recent_channels','startv_favorites','startv_channel_view','startv_card_size'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});
+                                        localStorage.setItem(resetKey,String(resetAt));
+                                    }
+                                    setTimeout(function(){ try{ location.reload(); }catch(e){} }, 120);
+                                    return;
+                                }
+                            } catch(e) {}
+                        }
                     } else {
                         window.saveSettings && window.saveSettings();
                     }
@@ -4849,6 +4967,194 @@ body.light-mode #fakeViewers{color:#64748b!important}
             window.saveLocalData&&window.saveLocalData(); window.updateStats&&window.updateStats(); window.renderFrontend&&window.renderFrontend(); window.updateLiveStatus && window.updateLiveStatus(); window.renderAdminList&&window.renderAdminList(); window.logAdminAction&&window.logAdminAction('Deleted '+n+' offline channels'); alert(n+' offline channels deleted.');
         };
 
+
+        // ==================== ADMIN FIX CENTER ====================
+        window._adminRuntimeErrors = window._adminRuntimeErrors || [];
+        window.runAdminDiagnostics = function(){
+            var checks=[],ok=0,warn=0,bad=0;
+            function check(name,pass,detail,level){
+                var state=pass?'OK':(level==='warn'?'WARN':'FAIL');
+                if(state==='OK')ok++;else if(state==='WARN')warn++;else bad++;
+                checks.push({name:name,state:state,detail:String(detail||'')});
+            }
+            var requiredIds=['adminOverlay','dashboardView','xstarContent','channelGrid','adminChList','chName','chUrl','saveBtn','adminUser','adminPass'];
+            var missing=requiredIds.filter(function(id){return !document.getElementById(id);});
+            check('Admin UI elements',missing.length===0,missing.length?'Missing: '+missing.join(', '):'All core elements found.');
+            var lsOK=false;
+            try{localStorage.setItem('_startv_health_test','1');localStorage.removeItem('_startv_health_test');lsOK=true;}catch(e){}
+            check('Local storage',lsOK,lsOK?'Writable':'Browser storage is blocked/unavailable.');
+            check('Channel data',!!window.allData&&typeof window.allData==='object','Channels: '+Object.keys(window.allData||{}).length);
+            check('Customer data',!!window.allUsers&&typeof window.allUsers==='object','Customers: '+Object.keys(window.allUsers||{}).length);
+            check('Operator data',!!window.allOperators&&typeof window.allOperators==='object','Operators: '+Object.keys(window.allOperators||{}).length);
+            var badChannels=Object.keys(window.allData||{}).filter(function(k){var c=window.allData[k]||{};return !c.name||!c.url;});
+            check('Channel records',badChannels.length===0,badChannels.length?'Invalid records: '+badChannels.length:'All channel records have name + URL.');
+            var badOps=Object.keys(window.allOperators||{}).filter(function(k){var o=window.allOperators[k]||{};return !o.password;});
+            check('Operator records',badOps.length===0,badOps.length?'Missing password in: '+badOps.join(', '):'Operator records look valid.');
+            check('Settings',!!window.settings&&typeof window.settings==='object','Settings object available.');
+            check('Firebase',!!window.firebaseReady&&!!db,window.firebaseReady&&db?'Connected/initialized':'Offline/not initialized; local mode remains available.','warn');
+            check('Video player',!!document.getElementById('tvPlayer'),'Player element found.');
+            check('HLS library',typeof Hls!=='undefined',typeof Hls!=='undefined'?'Hls.js loaded':'Hls.js not loaded; native playback may still work.','warn');
+            check('Runtime errors',window._adminRuntimeErrors.length===0,window._adminRuntimeErrors.length?'Recent errors: '+window._adminRuntimeErrors.slice(-3).join(' | '):'No captured runtime errors.');
+            var score=Math.max(0,Math.round((ok/(ok+warn+bad||1))*100));
+            var color=bad?'var(--red)':(warn?'#f59e0b':'var(--green)');
+            var health=document.getElementById('adminFixHealthText');
+            if(health)health.innerHTML='<b style="color:'+color+'">'+score+'% — '+(bad?'Attention needed':(warn?'Mostly healthy':'Healthy'))+'</b> · '+ok+' OK · '+warn+' warnings · '+bad+' failed';
+            var report=document.getElementById('adminFixReport');
+            if(report)report.innerHTML=checks.map(function(c){
+                var icon=c.state==='OK'?'✅':(c.state==='WARN'?'⚠️':'❌');
+                return '<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);"><b>'+window.escapeHtml(c.name)+'</b> '+icon+'<br><span style="opacity:.85;">'+window.escapeHtml(c.detail)+'</span></div>';
+            }).join('')+'<div style="margin-top:8px;"><b>Checked:</b> '+new Date().toLocaleString()+'</div>';
+            return {score:score,ok:ok,warn:warn,bad:bad};
+        };
+
+        window.refreshAdminWorkspace=function(){
+            try{
+                window.updateStats&&window.updateStats();
+                window.renderCategoriesUI&&window.renderCategoriesUI();
+                window.renderFrontend&&window.renderFrontend();
+                window.updateLiveStatus&&window.updateLiveStatus();
+                window.renderAdminList&&window.renderAdminList();
+                window.renderUserList&&window.renderUserList();
+                window.renderOperatorList&&window.renderOperatorList();
+                window.renderRecentBar&&window.renderRecentBar();
+                window.restoreAllExtraFeaturesUI&&window.restoreAllExtraFeaturesUI();
+                window.refreshAdminMetrics&&window.refreshAdminMetrics();
+                window.renderAdminLog&&window.renderAdminLog();
+                window.renderAdminLoginHistory&&window.renderAdminLoginHistory();
+                window.applySettings&&window.applySettings();
+                window.showToast&&window.showToast('Admin UI rebuilt successfully');
+                window.runAdminDiagnostics&&window.runAdminDiagnostics();
+            }catch(e){
+                window._adminRuntimeErrors.push('Workspace rebuild: '+(e.message||e));
+                alert('Admin UI rebuild encountered an error: '+(e.message||e));
+            }
+        };
+
+        window.repairAdminSystem=function(){
+            if(!confirm('Run safe auto-fix? It will normalize missing structures and rebuild the Admin UI. It will NOT delete channels, customers or operators.')) return;
+            try{
+                window.allData=(window.allData&&typeof window.allData==='object')?window.allData:{};
+                window.allUsers=(window.allUsers&&typeof window.allUsers==='object')?window.allUsers:{};
+                window.allOperators=(window.allOperators&&typeof window.allOperators==='object')?window.allOperators:{};
+                window.settings=(window.settings&&typeof window.settings==='object')?window.settings:{};
+                window.settings.notice=window.settings.notice==null?'Welcome to Star TV':String(window.settings.notice);
+                if(window.settings.notice_enabled===undefined)window.settings.notice_enabled=true;
+                if(window.settings.brand_text==null)window.settings.brand_text='STAR TV';
+                if(window.settings.default_category==null)window.settings.default_category='All';
+                if(!Array.isArray(window.settings.categories))window.settings.categories=[];
+                Object.keys(window.allData).forEach(function(k){
+                    var c=window.allData[k];
+                    if(!c||typeof c!=='object')return;
+                    if(!c.name)c.name='Unnamed Channel';
+                    if(!c.category)c.category='Entertainment';
+                    if(c.isPremium===undefined)c.isPremium=false;
+                    if(c.isOffline===undefined)c.isOffline=false;
+                    if(c.createdAt===undefined)c.createdAt=Date.now();
+                });
+                window.saveLocalData&&window.saveLocalData();
+                window.saveSettings&&window.saveSettings();
+                window.refreshAdminWorkspace&&window.refreshAdminWorkspace();
+                alert('Safe Auto-Fix completed. No channel/customer/operator records were deleted.');
+            }catch(e){
+                window._adminRuntimeErrors.push('Auto-fix: '+(e.message||e));
+                alert('Auto-Fix failed: '+(e.message||e));
+            }
+        };
+
+        window.syncAdminDataNow=async function(){
+            if(!window.firebaseReady||!db)return alert('Firebase is not ready. Local data remains saved; connect Firebase and try again.');
+            if(!confirm('Sync current Channels, Customers, Operators and Settings to Firebase now?'))return;
+            var status=document.getElementById('customerFixStatus');
+            if(status)status.innerText='Syncing all data to Firebase…';
+            try{
+                await Promise.all([
+                    set(ref(db,'channels'),window.allData||{}),
+                    set(ref(db,'users'),window.allUsers||{}),
+                    set(ref(db,'operators'),window.allOperators||{}),
+                    set(ref(db,'settings'),window.settings||{})
+                ]);
+                if(status)status.innerText='Cloud sync completed successfully.';
+                window.logAdminAction&&window.logAdminAction('Manual full Firebase sync completed');
+                alert('Firebase sync completed successfully.');
+            }catch(e){
+                if(status)status.innerText='Firebase sync failed: '+(e.message||e);
+                window._adminRuntimeErrors.push('Firebase sync: '+(e.message||e));
+                alert('Firebase sync failed: '+(e.message||e));
+            }
+        };
+
+        window.restoreAdminFromLocalSnapshot=function(){
+            if(!confirm('Restore Channels, Customers, Operators and Settings from this browser local snapshot? This can replace current in-memory data.'))return;
+            try{
+                var c=localStorage.getItem('startv_local_channels'),u=localStorage.getItem('startv_local_users'),o=localStorage.getItem('startv_local_operators'),st=localStorage.getItem('startv_local_settings');
+                if(c)window.allData=JSON.parse(c);
+                if(u)window.allUsers=JSON.parse(u);
+                if(o)window.allOperators=JSON.parse(o);
+                if(st)window.settings=Object.assign({},window.settings||{},JSON.parse(st));
+                window.refreshAdminWorkspace&&window.refreshAdminWorkspace();
+                alert('Local snapshot restored. Use Sync All to Firebase if you want to push it to the cloud.');
+            }catch(e){alert('Local snapshot restore failed: '+(e.message||e));}
+        };
+
+        window.resetCustomerFrontendPrefsLocal=function(){
+            if(!confirm('Reset frontend preferences on THIS admin device only?'))return;
+            ['startv_home_sort','startv_last_channel','startv_recent_channels','startv_favorites','startv_channel_view','startv_card_size'].forEach(function(k){try{localStorage.removeItem(k)}catch(e){}});
+            window.favorites=[];window.recentChannels=[];window.homeSortMode='default';window.channelViewMode='grid';
+            window.renderRecentBar&&window.renderRecentBar();window.renderFrontend&&window.renderFrontend();
+            alert('This device frontend preferences were reset.');
+        };
+
+        window.saveCustomerPerformanceControls=function(){
+            var s=window.settings||{};
+            var perf=document.getElementById('customerPerformanceMode'),fake=document.getElementById('customerDisableFakeViewers'),toast=document.getElementById('customerDisableToasts'),buf=document.getElementById('customerBufferMode'),aq=document.getElementById('customerAutoQuality');
+            s.customer_performance_mode=!!(perf&&perf.checked);
+            s.show_fake_viewers=!(fake&&fake.checked);
+            s.show_toasts=!(toast&&toast.checked);
+            s.iptv_buffer_mode=buf&&buf.value||'balanced';
+            s.iptv_auto_quality=!(aq&&aq.value==='0');
+            s.customer_performance_updated_at=Date.now();
+            window.settings=s;
+            window.saveSettings&&window.saveSettings();
+            window.applySettings&&window.applySettings();
+            var st=document.getElementById('customerFixStatus');if(st)st.innerText='Customer performance controls saved and will sync.';
+            window.logAdminAction&&window.logAdminAction('Updated customer performance controls');
+            alert('Customer performance controls saved.');
+        };
+
+        window.applyCustomerPerformancePreset=function(){
+            var perf=document.getElementById('customerPerformanceMode'),fake=document.getElementById('customerDisableFakeViewers'),toast=document.getElementById('customerDisableToasts'),buf=document.getElementById('customerBufferMode'),aq=document.getElementById('customerAutoQuality');
+            if(perf)perf.checked=true;if(fake)fake.checked=true;if(toast)toast.checked=true;if(buf)buf.value='stable';if(aq)aq.value='1';
+            window.saveCustomerPerformanceControls();
+        };
+
+        window.forceCustomerRefresh=function(){
+            if(!confirm('Send a refresh signal to all customer panels? Customers will reload when they receive the updated settings.'))return;
+            window.settings=window.settings||{};window.settings.customer_soft_reload_at=Date.now();
+            window.saveSettings&&window.saveSettings();
+            var st=document.getElementById('customerFixStatus');if(st)st.innerText='Customer refresh signal sent.';
+            window.logAdminAction&&window.logAdminAction('Sent customer refresh signal');
+        };
+
+        window.resetCustomerPrefsAndRefresh=function(){
+            if(!confirm('Reset common customer UI preferences and refresh all customer panels?'))return;
+            window.settings=window.settings||{};var now=Date.now();
+            window.settings.customer_reset_prefs_at=now;window.settings.customer_soft_reload_at=now;
+            window.saveSettings&&window.saveSettings();
+            var st=document.getElementById('customerFixStatus');if(st)st.innerText='Customer UI reset + refresh signal sent.';
+            window.logAdminAction&&window.logAdminAction('Sent customer UI reset + refresh signal');
+        };
+
+        window.restoreAdminFixUI=function(){
+            try{
+                var s=window.settings||{};
+                var perf=document.getElementById('customerPerformanceMode');if(perf)perf.checked=!!s.customer_performance_mode;
+                var fake=document.getElementById('customerDisableFakeViewers');if(fake)fake.checked=s.show_fake_viewers===false;
+                var toast=document.getElementById('customerDisableToasts');if(toast)toast.checked=s.show_toasts===false;
+                var buf=document.getElementById('customerBufferMode');if(buf)buf.value=s.iptv_buffer_mode||'balanced';
+                var aq=document.getElementById('customerAutoQuality');if(aq)aq.value=s.iptv_auto_quality===false?'0':'1';
+            }catch(e){}
+        };
+
         window.renderFrontend = function() { 
 
             var grid = document.getElementById("channelGrid");
@@ -5012,15 +5318,43 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
             if(!name || !url) return alert("Name and URL required."); 
 
-            if(!key || !window.allData[key]) key = "ch_" + Date.now(); 
+            if(!key || !window.allData[key]) key = "ch_" + Date.now() + "_" + Math.floor(Math.random()*1000000); 
 
             
 
             var noteEl = document.getElementById('chNote');
             var noteVal = noteEl ? noteEl.value.trim() : '';
-            window.allData[key] = Object.assign({}, window.allData[key] || {}, { name: name, category: cat, url: url, logo: logo, epgId: (document.getElementById('chEpgId') ? document.getElementById('chEpgId').value.trim() : ''), note: noteVal, isOffline: false, isPremium: prem, playCount: (window.allData[key] && window.allData[key].playCount) || 0, createdAt: (window.allData[key] && window.allData[key].createdAt) || Date.now() }); 
+            window.allData[key] = Object.assign({}, window.allData[key] || {}, { name: name, category: cat, url: url, logo: logo, epgId: (document.getElementById('chEpgId') ? document.getElementById('chEpgId').value.trim() : ''), note: noteVal, isOffline: false, isPremium: prem, playCount: (window.allData[key] && window.allData[key].playCount) || 0, createdAt: (window.allData[key] && window.allData[key].createdAt) || Date.now() });
 
-            window.saveLocalData(); 
+            // Mark this channel as pending before saving so an old Firebase
+            // snapshot cannot immediately remove it from the admin list.
+            window._pendingChannelWrites = window._pendingChannelWrites || {};
+            window._pendingChannelWrites[key] = true;
+
+            // Always keep a local copy first. This also makes Add Channel work
+            // when Firebase is offline or its write permission is temporarily unavailable.
+            window.saveLocalData();
+
+            // Also write only this channel directly to Firebase and report failures
+            // instead of silently losing the user's new channel.
+            if (window.firebaseReady && db) {
+                try {
+                    var channelWrite = set(ref(db, 'channels/' + key), window.allData[key]);
+                    if (channelWrite && typeof channelWrite.then === 'function') {
+                        channelWrite.then(function() {
+                            delete window._pendingChannelWrites[key];
+                        }).catch(function(err) {
+                            console.warn('Channel Firebase save failed:', err);
+                            window.showToast && window.showToast('⚠️ Channel saved locally; cloud sync failed');
+                        });
+                    }
+                } catch (err) {
+                    console.warn('Channel Firebase save failed:', err);
+                    window.showToast && window.showToast('⚠️ Channel saved locally; cloud sync failed');
+                }
+            } else {
+                delete window._pendingChannelWrites[key];
+            } 
 
             window.updateStats(); 
 
@@ -5045,7 +5379,9 @@ body.light-mode #fakeViewers{color:#64748b!important}
             if(formTitle) formTitle.innerText = "Add / Edit Single Channel";
             if(saveBtn) saveBtn.innerText = "+ Add Channel";
             window.logAdminAction && window.logAdminAction("Saved channel: " + name);
-            alert("Channel Saved Successfully!"); 
+            alert(window.firebaseReady && db
+                ? "Channel Saved Successfully!"
+                : "Channel Saved Successfully! (Local storage)"); 
         };
 
 
@@ -6085,6 +6421,55 @@ body.light-mode #fakeViewers{color:#64748b!important}
             if(!url) return alert('Enter an M3U URL.');
             window.settings.auto_m3u_url=url; window.saveSettings(); window.syncM3UNow();
         };
+        window.importM3UFromURL=async function(){
+            var input=document.getElementById('m3uUrlInput');
+            var url=input?input.value.trim():'';
+            var status=document.getElementById('linkCheckProgress');
+            if(!url) return alert('Paste an M3U playlist URL first.');
+            if(!/^https?:\/\//i.test(url)) return alert('Please use a valid http/https M3U URL.');
+            if(status) status.innerText='Downloading M3U playlist…';
+            try{
+                var r=await fetch(url,{cache:'no-store'});
+                if(!r.ok) throw new Error('HTTP '+r.status);
+                var text=await r.text();
+                if(!text || text.length<5) throw new Error('Playlist is empty.');
+                var lines=text.split(/\r?\n/), name='',logo='',cat='Entertainment',count=0,skipped=0;
+                var markVip=!!(document.getElementById('m3uMarkVip')&&document.getElementById('m3uMarkVip').checked);
+                var skipDup=!!(document.getElementById('m3uSkipDuplicates')&&document.getElementById('m3uSkipDuplicates').checked);
+                for(var i=0;i<lines.length;i++){
+                    var line=(lines[i]||'').trim();
+                    if(line.indexOf('#EXTINF')===0){
+                        var lm=line.match(/tvg-logo="([^"]+)"/i),cm=line.match(/group-title="([^"]+)"/i);
+                        logo=lm?lm[1]:''; cat=cm?cm[1]:'Entertainment';
+                        var parts=line.split(','); name=(parts[parts.length-1]||'Channel').trim();
+                    }else if(/^https?:\/\//i.test(line) && name){
+                        var exists=Object.keys(window.allData||{}).some(function(k){
+                            return window.allData[k]&&String(window.allData[k].name||'').trim().toLowerCase()===name.toLowerCase();
+                        });
+                        if(skipDup && exists){ skipped++; name='';logo='';continue; }
+                        var key='ch_'+Date.now()+'_'+i+'_'+Math.floor(Math.random()*1000000);
+                        window.allData[key]={name:name,category:cat,url:line,logo:logo,isOffline:false,isPremium:markVip,createdAt:Date.now()};
+                        count++; name='';logo='';
+                    }
+                }
+                if(!count){
+                    if(status) status.innerText='No new channels found. '+skipped+' duplicate(s) skipped.';
+                    return alert('No new channels imported. Check the playlist format or duplicate setting.');
+                }
+                window.saveLocalData&&window.saveLocalData();
+                window.updateStats&&window.updateStats();
+                window.renderCategoriesUI&&window.renderCategoriesUI();
+                window.renderFrontend&&window.renderFrontend();
+                window.updateLiveStatus&&window.updateLiveStatus();
+                window.renderAdminList&&window.renderAdminList();
+                if(status) status.innerText='M3U URL import complete: '+count+' added, '+skipped+' skipped.';
+                window.logAdminAction&&window.logAdminAction('M3U URL import: '+count+' added, '+skipped+' skipped');
+                alert('M3U import complete: '+count+' channel(s) added.');
+            }catch(err){
+                if(status) status.innerText='M3U URL import failed: '+(err.message||err);
+                alert('M3U URL import failed. The playlist server may block browser CORS requests. Error: '+(err.message||err));
+            }
+        };
         window.syncM3UNow=async function(){
             var url=(window.settings&&window.settings.auto_m3u_url)||((document.getElementById('autoM3UUrl')||{}).value||'').trim();
             if(!url) return alert('Set an M3U Auto-Sync URL first.');
@@ -6519,6 +6904,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
         };
 
         window.restoreAllExtraFeaturesUI = function() {
+            window.restoreAdminFixUI && window.restoreAdminFixUI();
             window.restoreWatermarkUI && window.restoreWatermarkUI();
             window.restoreParentalUI && window.restoreParentalUI();
             window.restoreExtraPlayerUI && window.restoreExtraPlayerUI();
@@ -6554,8 +6940,31 @@ body.light-mode #fakeViewers{color:#64748b!important}
                     window.renderAdminLoginHistory && window.renderAdminLoginHistory();
                 }
                 if (name === 'devices') window.showDeviceSessionReport && window.showDeviceSessionReport();
+                if (name === 'fixes') {
+                    window.restoreAdminFixUI && window.restoreAdminFixUI();
+                    window.runAdminDiagnostics && window.runAdminDiagnostics();
+                }
             } catch(e) { console.warn(e); }
         };
+
+        // Capture recent runtime errors so Admin Fix Center can report them.
+        window.addEventListener('error', function(ev){
+            try{
+                var msg=(ev&&ev.message)||'Unknown runtime error';
+                window._adminRuntimeErrors=window._adminRuntimeErrors||[];
+                window._adminRuntimeErrors.push(msg);
+                if(window._adminRuntimeErrors.length>20)window._adminRuntimeErrors.shift();
+            }catch(e){}
+        });
+        window.addEventListener('unhandledrejection', function(ev){
+            try{
+                var reason=ev&&ev.reason;
+                var msg='Unhandled promise: '+(reason&&(reason.message||reason)||'unknown');
+                window._adminRuntimeErrors=window._adminRuntimeErrors||[];
+                window._adminRuntimeErrors.push(msg);
+                if(window._adminRuntimeErrors.length>20)window._adminRuntimeErrors.shift();
+            }catch(e){}
+        });
 
         initApp();
 
