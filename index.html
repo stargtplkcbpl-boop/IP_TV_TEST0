@@ -1447,17 +1447,15 @@
         .container { padding-top: 10px; }
         .player-box {
             border: none !important;
-            border-radius: 0 !important;
-            margin: 0 -16px 20px !important; 
+            border-radius: 12px !important;
+            margin: 0 0 16px !important; 
             box-shadow: none !important;
             background: #000;
+            overflow: hidden;
         }
 
-        /* 3. Hide Cluttered Controls */
-        .player-controls-bar {
-            display: none !important; 
-        }
-        
+        /* 3. Extra control bar hidden — use native video controls only */
+        .player-controls-bar,
         .sleep-panel {
             display: none !important;
         }
@@ -1527,13 +1525,19 @@
             box-shadow: none !important;
         }
 
-        /* Hide Grid/List Toggle Button */
+        /* Grid/List toggle hidden for clean UI */
         .view-toggle { display: none !important; }
 
         /* 7. Large Premium Channel Cards */
         .grid {
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
-            gap: 25px !important;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+            gap: 14px !important;
+        }
+        @media (min-width: 700px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+                gap: 20px !important;
+            }
         }
 
         .card {
@@ -1570,6 +1574,18 @@
         }
 
     
+
+/* Customer mobile grid */
+@media (max-width: 650px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+  .banner { height: 100px !important; }
+  .name { font-size: 13px !important; }
+  .player-controls-bar, .sleep-panel, .view-toggle { display: none !important; }
+}
+
 /* Customer Welcome Splash */
 #customerWelcomeSplash{position:fixed;inset:0;z-index:999999;display:none;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,rgba(59,130,246,.22),transparent 38%),linear-gradient(135deg,#030712,#0b1220 55%,#111827);overflow:hidden;}
 #customerWelcomeSplash.show{display:flex;animation:stSplashIn .45s ease-out both;}
@@ -1890,32 +1906,12 @@ body.light-mode #fakeViewers{color:#64748b!important}
                     <button class="p-btn" style="background:rgba(239,68,68,.2);border-color:var(--red);color:var(--red)" onclick="cancelParentalUnlock()">Cancel</button>
                 </div>
             </div>
-            <div class="player-controls-bar">
-                <button class="p-btn" onclick="zapChannel(-1)" title="Previous">⏮ Prev</button>
-                <button class="p-btn" onclick="zapChannel(1)" title="Next">Next ⏭</button>
-                <select id="qualitySelect" class="quality-select" style="display:none;" onchange="changeStreamQuality(this.value)" title="Quality">
-                    <option value="-1">Auto</option>
-                </select>
-                <button class="p-btn" onclick="toggleAspectRatio()" id="aspectBtn" title="Aspect">🖥 Fit</button>
-                <button class="p-btn" onclick="togglePiP()" title="PiP">PiP</button>
-                <button class="p-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶ Full</button>
-                <button class="p-btn" onclick="refreshCurrentStream()">🔄 Reload</button>
-                <button class="p-btn" onclick="toggleSleepPanel()">⏱ Sleep</button>
-                <button class="p-btn" onclick="toggleMute()" id="muteBtn">🔊 Mute</button>
-                <div class="sleep-panel" id="sleepPanel">
-                    <button class="p-btn" onclick="setSleepTimer(15)">15m</button>
-                    <button class="p-btn" onclick="setSleepTimer(30)">30m</button>
-                    <button class="p-btn" onclick="setSleepTimer(45)">45m</button>
-                    <button class="p-btn" onclick="setSleepTimer(60)">60m</button>
-                    <button class="p-btn" onclick="setSleepTimer(0)">Cancel</button>
-                </div>
-            </div>
             <div class="now-playing">
                 <div>
                     <h2 id="nowTitle" style="font-size: 18px; font-weight: 700;">
                         <span class="live-dot">&bull;</span> Select a Channel
                     </h2>
-                    <div class="zap-hint">Prev/Next channel · native video controls for play</div>
+                    
                     <div id="epgNow" style="font-size:12px;color:var(--muted);margin-top:6px;"></div>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -1932,10 +1928,6 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
             <h3 style="font-size: 20px; font-weight: 800; letter-spacing: 0.5px; margin:0;">Live Channels</h3>
-            <div class="view-toggle">
-                <button type="button" id="viewGridBtn" class="active" onclick="setChannelView('grid')">▦ Grid</button>
-                <button type="button" id="viewListBtn" onclick="setChannelView('list')">☰ List</button>
-            </div>
         </div>
 
         <div class="category-tabs" id="categoryTabs"></div>
@@ -2867,7 +2859,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
             viewer_max: 100,
             auto_hide_viewers: true,
             auto_resume: true,
-            show_offline_section: false,
+            show_offline_section: true,
             show_toasts: true,
             auto_offline_on_play_error: false,
             auto_m3u_url: '',
