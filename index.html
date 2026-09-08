@@ -8,7 +8,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#05070d"><title>Star TV - APK Smooth Final</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#05070d"><title>Star TV</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
@@ -1736,27 +1736,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
 <body>
 
-<script>
-/* STAR TV APK SMOOTH BOOT — must run early */
-(function(){
-  try {
-    var ua = navigator.userAgent || '';
-    var isAndroid = /Android/i.test(ua);
-    var isWebView = /; wv\)/i.test(ua) || /Version\/\d+\.\d+.*Chrome\//i.test(ua) && /Mobile/i.test(ua) && !/Safari\/\d+/i.test(ua.split('Chrome')[0]) ||
-      !!(window.Android || window.AndroidInterface || window.webToApk || window.WebViewJavascriptBridge);
-    // Many web-to-apk wrappers still look like Chrome; treat all Android as APK-priority
-    window.__startvIsApk = isAndroid || isWebView || true === window.__FORCE_APK_MODE;
-    if (window.__startvIsApk) {
-      document.documentElement.classList.add('startv-apk', 'webview-performance', 'startv-webview-optimized');
-    }
-  } catch(e) {}
-})();
-</script>
-
-
-
-
-    <div id="customerLockScreen" style="display:none;">
+<div id="customerLockScreen" style="display:none;">
 
         <div class="lock-box">
 
@@ -3074,7 +3054,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
                     });
 
                     window._channelsFirebaseInitialized = true;
-                    // Debounce heavy UI rebuilds to stop hang on APK / many channels
+                    // Debounce heavy UI rebuilds when many channels
                     clearTimeout(window._channelsUiTimer);
                     window._channelsUiTimer = setTimeout(function(){
                         try {
@@ -5268,7 +5248,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
                 if(homeSort==='newest') return (Number(B.createdAt||0)-Number(A.createdAt||0)) || String(B.name||'').localeCompare(String(A.name||''));
                 return 0;
             });
-            var _renderBudget = (window.__startvIsApk || /Android/i.test(navigator.userAgent||'')) ? 80 : 120; // APK: fewer DOM cards = smoother
+            var _renderBudget = 200; // normal web: allow more cards
             var _renderedCards = 0;
             channelKeys.forEach(function(key) { 
                 var ch = window.allData[key]; 
@@ -6110,13 +6090,11 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
             if (typeof Hls !== 'undefined' && Hls.isSupported()) {
                 var bufferMode=(window.settings&&window.settings.iptv_buffer_mode)||'stable';
-                // APK/WebView: keep buffers modest to avoid OOM / hang on mid-range Android
-                var isApk = !!(window.__startvIsApk || /Android/i.test(navigator.userAgent||''));
                 var bufferCfg = bufferMode==='low'
                     ? {maxBufferLength:4,maxMaxBufferLength:10,backBufferLength:2,maxBufferSize:6*1000*1000}
-                    : (bufferMode==='stable' || isApk
-                        ? {maxBufferLength:8,maxMaxBufferLength:16,backBufferLength:4,maxBufferSize:10*1000*1000}
-                        : {maxBufferLength:10,maxMaxBufferLength:20,backBufferLength:5,maxBufferSize:14*1000*1000});
+                    : (bufferMode==='stable'
+                        ? {maxBufferLength:10,maxMaxBufferLength:20,backBufferLength:5,maxBufferSize:14*1000*1000}
+                        : {maxBufferLength:12,maxMaxBufferLength:30,backBufferLength:8,maxBufferSize:20*1000*1000});
                 var playbackRetryCount=0;
                 var playbackReady=false;
                 var playbackTimer=setTimeout(function(){
@@ -6155,21 +6133,20 @@ body.light-mode #fakeViewers{color:#64748b!important}
                     fragLoadingRetryDelay: 1000,
                     manifestLoadingRetryDelay: 1200,
                     levelLoadingRetryDelay: 1200,
-                    // Prefer smoother playback over top quality on mobile APK
+                    // HLS playback tuning
                     autoStartLoad: true,
                     progressive: false
                 }, bufferCfg));
                 try {
-                  if (isApk && window.settings && window.settings.network_saver !== false) {
-                    // Cap very high bitrates on small screens / weak devices
+                  // Optional: soft quality cap on very small screens (normal web)
+                  if (window.innerWidth < 420 && window.settings && window.settings.network_saver !== false) {
                     window.windowHls.on(Hls.Events.MANIFEST_PARSED, function(){
                       try {
                         if (!window.windowHls || !window.windowHls.levels) return;
                         var levels = window.windowHls.levels;
-                        var maxH = window.innerWidth < 500 ? 480 : 720;
                         var cap = -1;
                         for (var li=0; li<levels.length; li++) {
-                          if (levels[li].height && levels[li].height <= maxH) cap = li;
+                          if (levels[li].height && levels[li].height <= 480) cap = li;
                         }
                         if (cap >= 0) window.windowHls.autoLevelCapping = cap;
                       } catch(e){}
@@ -6853,7 +6830,7 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
         window.startIPTVHealthMonitor=function(){if(window._iptvHealthTimer)clearInterval(window._iptvHealthTimer);var mins=parseInt((window.settings&&window.settings.iptv_health_interval)||0,10);if(!mins)return;window._iptvHealthTimer=setInterval(function(){if(window.settings&&window.settings.iptv_health_interval>0)window.runIPTVHealthCheck();},mins*60*1000);};
 
-        window.addEventListener('load',function(){window.loadRememberedAdmin();window.restoreAdvancedSettings();window.restoreIPTVAdvancedSettings&&window.restoreIPTVAdvancedSettings();window.restoreAllExtraFeaturesUI&&window.restoreAllExtraFeaturesUI();window.startIPTVHealthMonitor&&window.startIPTVHealthMonitor(); /* EPG/M3U auto-sync only if configured — reduces APK hang */ if(window.settings&&window.settings.epg_url) window.loadEPG&&window.loadEPG(); setTimeout(function(){ if(window.settings&&window.settings.auto_m3u_url) window.syncM3UNow(); },4000); if(window._m3uSyncTimer) clearInterval(window._m3uSyncTimer); if(window.settings&&window.settings.auto_m3u_url){ window._m3uSyncTimer=setInterval(function(){ if(!document.hidden && window.settings&&window.settings.auto_m3u_url) window.syncM3UNow(); },60*60*1000); }});
+        window.addEventListener('load',function(){window.loadRememberedAdmin();window.restoreAdvancedSettings();window.restoreIPTVAdvancedSettings&&window.restoreIPTVAdvancedSettings();window.restoreAllExtraFeaturesUI&&window.restoreAllExtraFeaturesUI();window.startIPTVHealthMonitor&&window.startIPTVHealthMonitor(); /* EPG/M3U auto-sync only if configured */ if(window.settings&&window.settings.epg_url) window.loadEPG&&window.loadEPG(); setTimeout(function(){ if(window.settings&&window.settings.auto_m3u_url) window.syncM3UNow(); },4000); if(window._m3uSyncTimer) clearInterval(window._m3uSyncTimer); if(window.settings&&window.settings.auto_m3u_url){ window._m3uSyncTimer=setInterval(function(){ if(!document.hidden && window.settings&&window.settings.auto_m3u_url) window.syncM3UNow(); },60*60*1000); }});
 
 
         // ==================== EXTRA FEATURES (Watermark, Parental, Theme, Play Stats, Notices) ====================
@@ -7152,514 +7129,5 @@ body.light-mode #fakeViewers{color:#64748b!important}
 
     </script>
 
-<script>
-/* ================= STAR TV WEBVIEW FINAL PERFORMANCE LAYER =================
-   Client-side optimizations for Web-to-APK / Android WebView.
-   This does not replace server-side authentication/security.
-*/
-(function(){
-  'use strict';
-  var root=document.documentElement;
-  root.classList.add('startv-webview-optimized');
-
-  var css=document.createElement('style');
-  css.textContent=`
-    /* Reduce expensive GPU effects on low/mid Android devices */
-    .startv-webview-optimized *, .startv-webview-optimized *::before, .startv-webview-optimized *::after { -webkit-tap-highlight-color: transparent; }
-    .startv-webview-optimized .card { contain: content; content-visibility:auto; contain-intrinsic-size: 180px 150px; }
-    .startv-webview-optimized img { content-visibility:auto; }
-    .startv-webview-optimized .grid { contain: layout paint; }
-    .startv-webview-optimized .admin-panel, .startv-webview-optimized .admin-overlay { overscroll-behavior:contain; }
-    @media (max-width:700px){
-      .startv-webview-optimized .grid { gap:10px!important; }
-      .startv-webview-optimized .card { border-radius:12px!important; }
-      .startv-webview-optimized .banner { min-height:0!important; }
-      .startv-webview-optimized .player-wrap { transform:translateZ(0); }
-    }
-  `;
-  document.head.appendChild(css);
-
-  /* Batch repeated frontend renders into one frame. */
-  var originalRender=window.renderFrontend;
-  if(originalRender && !window.__startvRenderPatched){
-    window.__startvRenderPatched=true;
-    var queued=false;
-    window.renderFrontend=function(){
-      if(queued) return;
-      queued=true;
-      requestAnimationFrame(function(){ queued=false; try{ originalRender.apply(window,arguments); }catch(e){ console.warn(e); } });
-    };
-  }
-
-  /* Search: don't rebuild hundreds of cards on every keystroke. */
-  function bindSearch(){
-    var el=document.getElementById('homeSearch');
-    if(!el || el.__startvSearchBound) return;
-    el.__startvSearchBound=true;
-    var timer=0;
-    el.addEventListener('input',function(){
-      clearTimeout(timer);
-      timer=setTimeout(function(){ if(window.renderFrontend) window.renderFrontend(); },120);
-    },{passive:true});
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bindSearch); else bindSearch();
-
-  /* Pause nonessential polling while the APK is backgrounded. */
-  document.addEventListener('visibilitychange',function(){
-    if(document.hidden){
-      if(window._iptvHealthTimer){ clearInterval(window._iptvHealthTimer); window._iptvHealthTimer=null; }
-      if(window._m3uSyncTimer){ clearInterval(window._m3uSyncTimer); window._m3uSyncTimer=null; }
-    }else{
-      if(window.startIPTVHealthMonitor) window.startIPTVHealthMonitor();
-      if(window.settings && window.settings.auto_m3u_url && !window._m3uSyncTimer){
-        window._m3uSyncTimer=setInterval(function(){ if(!document.hidden && window.settings && window.settings.auto_m3u_url && window.syncM3UNow) window.syncM3UNow(); },30*60*1000);
-      }
-    }
-  },{passive:true});
-
-  /* Mobile network hint: cap HLS quality automatically on very slow connections. */
-  function applyNetworkCap(){
-    try{
-      var c=navigator.connection||navigator.mozConnection||navigator.webkitConnection;
-      var slow=c && (c.saveData || /(^|-)2g$/.test(c.effectiveType||'') || c.effectiveType==='slow-2g');
-      var h=window.windowHls;
-      if(h && slow){
-        h.autoLevelCapping=0;
-        h.currentLevel=0;
-      } else if(h){ h.autoLevelCapping=-1; h.currentLevel=-1; }
-    }catch(e){}
-  }
-  setTimeout(applyNetworkCap,1500);
-  if(navigator.connection && navigator.connection.addEventListener) navigator.connection.addEventListener('change',applyNetworkCap,{passive:true});
-
-  /* Prevent accidental text selection/context menu on TV-style UI; inputs remain usable. */
-  document.addEventListener('contextmenu',function(e){
-    var t=e.target;
-    if(t && /INPUT|TEXTAREA|SELECT/.test(t.tagName)) return;
-    e.preventDefault();
-  },{passive:false});
-
-  /* Lightweight error guard: avoid one bad optional feature freezing the customer UI. */
-  window.addEventListener('error',function(e){
-    try{ if(window.showToast && /ResizeObserver|AbortError/.test(String(e.message||''))) return; }catch(x){}
-  });
-})();
-</script>
 </body>
-
-
-<script>
-/* =========================================================
-   STAR TV MOBILE / ANDROID WEBVIEW OPTIMIZATION + PRO TOOLS
-   Client-side features only; server/IP/MAC/DRM capabilities still
-   require a real backend/native Android integration.
-   ========================================================= */
-(function(){
-  'use strict';
-  var S=window.settings||{};
-  S.performance_mode = S.performance_mode !== false;
-  S.network_saver = S.network_saver !== false;
-  S.backup_urls = S.backup_urls || {};
-  S.quarantine = S.quarantine || {};
-  S.area_enabled = S.area_enabled !== false;
-  S.promo_enabled = S.promo_enabled || false;
-  S.promo_text = S.promo_text || '';
-  S.promo_url = S.promo_url || '';
-  S.profit_rate = Number(S.profit_rate||0);
-  window.settings=S;
-
-  /* Android/WebView CSS: reduce expensive compositing and repaint work. */
-  var st=document.createElement('style');
-  st.textContent='\
-    html.webview-performance *,html.webview-performance *::before,html.webview-performance *::after{\
-      animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.08s!important;\
-    }\
-    html.webview-performance .admin-overlay,html.webview-performance .admin-panel{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}\
-    html.webview-performance .card{contain:layout paint style;content-visibility:auto;contain-intrinsic-size:180px 140px}\
-    html.webview-performance img{content-visibility:auto}\
-    #startvPromoOverlay{position:absolute;right:12px;bottom:58px;max-width:72%;z-index:20;display:none;padding:9px 12px;border-radius:10px;background:rgba(0,0,0,.72);color:#fff;font-size:12px;line-height:1.35;pointer-events:none}\
-    #startvPromoOverlay.show{display:block}\
-    #startvToolsModal{position:fixed;inset:0;z-index:120000;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,.72)}\
-    #startvToolsModal.show{display:flex}\
-    #startvToolsPanel{width:min(760px,96vw);max-height:90vh;overflow:auto;background:#0f172a;color:#fff;border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.6)}\
-    .st-tool-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.st-tool-grid button{min-height:42px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#172033;color:#fff;padding:8px;cursor:pointer}.st-tool-grid input,.st-tool-grid select{width:100%;box-sizing:border-box;margin-top:5px;background:#0b1220;color:#fff;border:1px solid #334155;border-radius:8px;padding:8px}\
-    #startvAreaSummary,#startvQuarantineList{font-size:12px;color:#cbd5e1;margin-top:10px;white-space:pre-wrap}\
-    @media(max-width:600px){.st-tool-grid{grid-template-columns:1fr}.card{will-change:auto!important}}\
-  ';
-  document.head.appendChild(st);
-
-  function ready(){
-    document.documentElement.classList.add('webview-performance');
-    var v=document.getElementById('tvPlayer');
-    if(v){v.setAttribute('playsinline','');v.setAttribute('webkit-playsinline','');v.preload='metadata';v.disablePictureInPicture=false;}
-    /* Stop background timers while app is hidden; WebView battery/CPU saver. */
-    document.addEventListener('visibilitychange',function(){
-      if(document.hidden){
-        if(window._iptvHealthTimer){clearInterval(window._iptvHealthTimer);window._iptvHealthTimer=null;}
-        if(window._m3uSyncTimer){clearInterval(window._m3uSyncTimer);window._m3uSyncTimer=null;}
-      }else{
-        if(window.startIPTVHealthMonitor) window.startIPTVHealthMonitor();
-      }
-    },{passive:true});
-  }
-
-  /* Coalesce repeated full-grid renders into one animation frame. */
-  function wrapRender(){
-    if(!window.renderFrontend || window.renderFrontend.__stOptimized) return;
-    var original=window.renderFrontend, pending=false;
-    function optimized(){
-      if(pending) return;
-      pending=true;
-      requestAnimationFrame(function(){pending=false;try{original();}catch(e){console.warn(e);}});
-    }
-    optimized.__stOptimized=true; optimized.__original=original;
-    window.renderFrontend=optimized;
-  }
-
-  /* Network saver: cap HLS quality on small/slow WebView screens. */
-  function applyNetworkSaver(){
-    var v=document.getElementById('tvPlayer');
-    if(!v || !window.windowHls) return;
-    try{
-      var save=window.settings && window.settings.network_saver!==false;
-      var slow=(navigator.connection && (navigator.connection.saveData || /(^|-)2g$/.test(navigator.connection.effectiveType||'')));
-      if(save && (slow || window.innerWidth<600)){
-        window.windowHls.autoLevelCapping=2;
-        window.windowHls.currentLevel=-1;
-      }else{
-        window.windowHls.autoLevelCapping=-1;
-      }
-    }catch(e){}
-  }
-  window.applyNetworkSaver=applyNetworkSaver;
-  if(navigator.connection) navigator.connection.addEventListener('change',applyNetworkSaver);
-
-  /* Smart fallback + quarantine. */
-  window.setBackupURL=function(key,url){
-    if(!key || !url) return;
-    window.settings.backup_urls[key]=String(url).trim();
-    window.saveSettings&&window.saveSettings();
-    window.showToast&&window.showToast('Backup URL saved');
-  };
-  window.smartFallbackChannel=async function(ch,key){
-    if(!ch||!key) return false;
-    var backup=window.settings.backup_urls[key]||ch.backupUrl||'';
-    if(!backup) return false;
-    try{
-      var r=await window.probeIPTVStream(backup,6500);
-      if(r.ok){
-        ch.primaryUrl=ch.primaryUrl||ch.url;
-        ch.url=backup; ch.isOffline=false; ch.lastError=''; ch.lastCheckedAt=Date.now();
-        window.saveLocalData&&window.saveLocalData();
-        return true;
-      }
-    }catch(e){}
-    return false;
-  };
-  window.quarantineOfflineChannels=function(){
-    var n=0; Object.keys(window.allData||{}).forEach(function(k){var c=window.allData[k];if(c&&c.isOffline){window.settings.quarantine[k]=Object.assign({},c,{quarantinedAt:Date.now()});delete window.allData[k];n++;}});
-    window.saveLocalData&&window.saveLocalData();window.saveSettings&&window.saveSettings();window.renderFrontend&&window.renderFrontend();window.renderAdminList&&window.renderAdminList();
-    window.showToast&&window.showToast(n+' offline channels quarantined');
-  };
-  window.restoreQuarantine=function(){
-    var n=0;Object.keys(window.settings.quarantine||{}).forEach(function(k){if(!window.allData[k]){var c=window.settings.quarantine[k];delete c.quarantinedAt;window.allData[k]=c;n++;}});
-    window.settings.quarantine={};window.saveLocalData&&window.saveLocalData();window.saveSettings&&window.saveSettings();window.renderFrontend&&window.renderFrontend();window.renderAdminList&&window.renderAdminList();window.showToast&&window.showToast(n+' channels restored');
-  };
-
-  /* Customer area / PIN grouping. */
-  window.setCustomerArea=function(pin){
-    var u=window.allUsers&&window.allUsers[pin];if(!u)return;
-    var area=prompt('Area / locality:',u.area||'');if(area===null)return;
-    var ward=prompt('Ward:',u.ward||'');if(ward===null)return;
-    var pincode=prompt('PIN code:',u.pincode||'');if(pincode===null)return;
-    u.area=area.trim();u.ward=ward.trim();u.pincode=pincode.trim();window.saveLocalData&&window.saveLocalData();window.renderUserList&&window.renderUserList();
-  };
-  window.exportAreaReport=function(){
-    var groups={};Object.keys(window.allUsers||{}).forEach(function(pin){var u=window.allUsers[pin]||{},g=[u.area||'Unknown',u.ward||'',u.pincode||''].filter(Boolean).join(' / ');groups[g]=(groups[g]||0)+1;});
-    var rows=Object.keys(groups).map(function(g){return {Area:g,Customers:groups[g]};});
-    if(window.XLSX){var ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Areas');XLSX.writeFile(wb,'StarTV_Area_Report.xlsx');}
-    else{var blob=new Blob([JSON.stringify(groups,null,2)],{type:'application/json'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='StarTV_Area_Report.json';a.click();URL.revokeObjectURL(u);}
-  };
-
-  /* Profit/revenue JPG snapshot. Uses customer records; enter rates in settings. */
-  window.exportProfitJPG=function(){
-    var users=window.allUsers||{}, active=0, expired=0, revenue=0;
-    Object.keys(users).forEach(function(k){var u=users[k]||{}, days=Math.max(0,Math.ceil(((u.expiry||0)-Date.now())/86400000));if(days>0&&u.active)active++;else expired++;revenue+=Number(u.amount||u.revenue||u.price||0);});
-    var rate=Number(window.settings.profit_rate||0), profit=rate?revenue*rate/100:0;
-    var c=document.createElement('canvas'),ctx=c.getContext('2d');c.width=1200;c.height=700;
-    ctx.fillStyle='#0b1220';ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle='#fff';ctx.font='bold 40px sans-serif';ctx.fillText('STAR TV — Revenue & Profit',60,80);ctx.font='24px sans-serif';
-    [['Generated',new Date().toLocaleString()],['Customers',Object.keys(users).length],['Active',active],['Expired',expired],['Revenue','₹ '+revenue.toFixed(2)],['Profit Rate',rate+'%'],['Estimated Profit','₹ '+profit.toFixed(2)]].forEach(function(x,i){ctx.fillStyle='#cbd5e1';ctx.fillText(x[0],80,150+i*65);ctx.fillStyle='#fff';ctx.fillText(String(x[1]),420,150+i*65);});
-    c.toBlob(function(blob){var u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='StarTV_Profit_Report.jpg';a.click();setTimeout(function(){URL.revokeObjectURL(u);},1000);},'image/jpeg',.92);
-  };
-
-  /* Lightweight watch-history analytics / heatmap data. */
-  window.recordWatchEvent=function(key){
-    if(!key)return;var h={};try{h=JSON.parse(localStorage.getItem('startv_watch_heatmap')||'{}')}catch(e){};
-    var d=new Date(),slot=d.getDay()+'-'+d.getHours();h[slot]=(h[slot]||0)+1;h['ch:'+key]=(h['ch:'+key]||0)+1;
-    try{localStorage.setItem('startv_watch_heatmap',JSON.stringify(h));}catch(e){}
-  };
-
-  /* Profiles: local household profiles with avatar/name. */
-  window.getProfiles=function(){try{var x=JSON.parse(localStorage.getItem('startv_profiles')||'[]');return Array.isArray(x)?x:[]}catch(e){return[]}};
-  window.addProfile=function(){var a=prompt('Profile name:','Family');if(!a)return;var av=prompt('Avatar emoji:','👤')||'👤',p=window.getProfiles();p.push({id:'p'+Date.now(),name:a.trim(),avatar:av});try{localStorage.setItem('startv_profiles',JSON.stringify(p));}catch(e){}window.showToast&&window.showToast('Profile added');};
-
-  /* Gesture channel/volume controls for phones/WebView. */
-  function gestures(){
-    var v=document.getElementById('tvPlayer');if(!v||v.__stGesture)return;v.__stGesture=true;
-    var sx=0,sy=0,st=0;
-    v.addEventListener('touchstart',function(e){if(!e.touches||!e.touches[0])return;sx=e.touches[0].clientX;sy=e.touches[0].clientY;st=Date.now();},{passive:true});
-    v.addEventListener('touchend',function(e){if(!e.changedTouches||!e.changedTouches[0])return;var t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;if(Date.now()-st>700)return;
-      if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)){window.zapChannel&&window.zapChannel(dx<0?1:-1);return;}
-      if(Math.abs(dy)>50&&Math.abs(dy)>Math.abs(dx)){var vol=Math.max(0,Math.min(1,v.volume+(dy<0?.1:-.1)));v.volume=vol;window.showToast&&window.showToast('Volume '+Math.round(vol*100)+'%');}
-    },{passive:true});
-  }
-
-  /* EPG timeline from already-loaded EPG cache. */
-  window.renderEPGTimeline=function(){
-    var ch=window.allData&&window.currentChannelKey?window.allData[window.currentChannelKey]:null,arr=ch&&window.epgData?window.epgData[ch.epgId||ch.tvgId||ch.id||ch.name]||[]:[];
-    var box=document.getElementById('epgNow');if(!box||!arr.length)return;
-    var now=Date.now(),html='<div style="margin-top:6px"><b>EPG</b></div>';
-    arr.filter(function(p){var t=Date.parse(p.end||p.start);return !isNaN(t)&&t>=now-3600000;}).slice(0,6).forEach(function(p){html+='<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.08)">'+window.escapeHtml(p.title||'Program')+' <span style="opacity:.65">'+window.escapeHtml(p.start||'')+'</span></div>';});
-    box.innerHTML=html;
-  };
-
-  /* Promo overlay / ticker helper. */
-  window.setPromoOverlay=function(text,url){window.settings.promo_text=String(text||'');window.settings.promo_url=String(url||'');window.settings.promo_enabled=!!text;window.saveSettings&&window.saveSettings();applyPromo();};
-  function applyPromo(){
-    var wrap=document.querySelector('.player-wrap');if(!wrap)return;var p=document.getElementById('startvPromoOverlay');
-    if(!p){p=document.createElement('div');p.id='startvPromoOverlay';wrap.appendChild(p);}
-    p.textContent=window.settings.promo_text||'';p.classList.toggle('show',!!window.settings.promo_enabled&&!!window.settings.promo_text);
-  }
-
-  /* Admin tools modal. */
-  window.openStarTVProTools=function(){
-    if(!window.isAdminSession){window.showToast&&window.showToast('Admin login required');return;}
-    var m=document.getElementById('startvToolsModal');if(!m){
-      m=document.createElement('div');m.id='startvToolsModal';m.innerHTML='<div id="startvToolsPanel"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">STAR TV Pro Tools</h3><button onclick="document.getElementById(\'startvToolsModal\').classList.remove(\'show\')">✕</button></div><div class="st-tool-grid" style="margin-top:12px">\
-      <button onclick="exportProfitJPG()">💰 Profit JPG</button><button onclick="exportAreaReport()">📍 Area Report</button>\
-      <button onclick="quarantineOfflineChannels()">🧹 Quarantine Offline</button><button onclick="restoreQuarantine()">♻ Restore Quarantine</button>\
-      <button onclick="addProfile()">👤 Add Profile</button><button onclick="exportIPTVReport&&exportIPTVReport()">📊 IPTV JSON Report</button>\
-      <label>Profit rate %<input id="stProfitRate" type="number" min="0" max="100" step="0.1"></label>\
-      <label>Promo text<input id="stPromoText" placeholder="Offer Zone / Live offer"></label>\
-      <button onclick="settings.profit_rate=Number(document.getElementById(\'stProfitRate\').value||0);saveSettings&&saveSettings();showToast&&showToast(\'Profit rate saved\')">Save Profit Rate</button>\
-      <button onclick="setPromoOverlay(document.getElementById(\'stPromoText\').value,\'\')">📣 Show Promo Overlay</button></div>\
-      <div id="startvAreaSummary"></div><div id="startvQuarantineList"></div></div>';
-      document.body.appendChild(m);
-    }
-    var r=document.getElementById('stProfitRate'),pt=document.getElementById('stPromoText');if(r)r.value=window.settings.profit_rate||0;if(pt)pt.value=window.settings.promo_text||'';m.classList.add('show');
-  };
-
-  /* Add a Pro Tools button without changing existing admin markup. */
-  function addAdminButton(){
-    var sidebar=document.getElementById('xstarSidebar');if(!sidebar||document.getElementById('stProToolsBtn'))return;
-    var b=document.createElement('button');b.id='stProToolsBtn';b.type='button';b.className='xstar-nav-btn';b.innerHTML='<span>🛠️</span><span class="xstar-label">Pro Tools</span>';b.onclick=window.openStarTVProTools;sidebar.appendChild(b);
-  }
-
-  /* Hook play counting into the new heatmap recorder and network saver. */
-  var oldInc=window.incrementPlayCount;
-  if(oldInc&&!oldInc.__stHeat){window.incrementPlayCount=function(key){try{window.recordWatchEvent(key)}catch(e){}var r=oldInc.apply(this,arguments);setTimeout(applyNetworkSaver,80);return r;};window.incrementPlayCount.__stHeat=true;}
-
-  function boot(){ready();setTimeout(function(){wrapRender();gestures();applyPromo();addAdminButton();},200);}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-})();
-</script>
-
-<script>
-/* =========================================================
-   STAR TV — APK TOTAL SMOOTH LAYER (WebView priority)
-   Web browser is optional; Android APK must stay fluid.
-   ========================================================= */
-(function(){
-  'use strict';
-  var isApk = !!(window.__startvIsApk || /Android/i.test(navigator.userAgent||''));
-  window.__startvIsApk = isApk;
-  if (!isApk) {
-    // Still apply light guards on mobile browsers
-    isApk = /Mobile|Android/i.test(navigator.userAgent||'');
-  }
-
-  // Force performance defaults every session on APK
-  function forceApkSettings(){
-    try {
-      var s = window.settings || {};
-      s.show_fake_viewers = false;
-      s.iptv_health_interval = 0;
-      s.iptv_buffer_mode = s.iptv_buffer_mode || 'stable';
-      s.network_saver = true;
-      s.performance_mode = true;
-      s.customer_performance_mode = true;
-      s.auto_offline_on_play_error = false;
-      s.show_offline_section = false;
-      // Don't auto-run heavy EPG/M3U jobs on weak devices
-      window.settings = s;
-      if (window._iptvHealthTimer) { clearInterval(window._iptvHealthTimer); window._iptvHealthTimer = null; }
-      if (window.viewerInterval) { clearInterval(window.viewerInterval); window.viewerInterval = null; }
-    } catch(e) {}
-  }
-
-  // Kill expensive CSS on APK
-  var css = document.createElement('style');
-  css.id = 'startv-apk-smooth-css';
-  css.textContent = [
-    'html.startv-apk,html.startv-apk body{background:#000!important;background-image:none!important}',
-    'html.startv-apk *{animation:none!important;transition-duration:.05s!important;scroll-behavior:auto!important}',
-    'html.startv-apk .admin-overlay,html.startv-apk .admin-panel,html.startv-apk .lock-box,html.startv-apk .card,html.startv-apk .navbar{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important}',
-    'html.startv-apk .st-splash-orb,html.startv-apk .pro-hero:after{display:none!important}',
-    'html.startv-apk .card{contain:strict;content-visibility:auto;contain-intrinsic-size:160px 130px;will-change:auto}',
-    'html.startv-apk img{content-visibility:auto;image-rendering:auto}',
-    'html.startv-apk .grid{contain:layout paint;gap:12px!important}',
-    'html.startv-apk video{transform:translateZ(0);max-height:100vh}',
-    'html.startv-apk .player-box,html.startv-apk .player-wrap{background:#000!important}',
-    'html.startv-apk #customerWelcomeSplash{animation:none!important}',
-    '@media (max-width:700px){html.startv-apk .grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}html.startv-apk .banner{height:100px!important}}'
-  ].join('');
-  document.head.appendChild(css);
-  document.documentElement.classList.add('startv-apk','webview-performance','startv-webview-optimized');
-
-  // Pause everything when app is backgrounded (huge battery/CPU win)
-  function freezeBackground(){
-    try {
-      if (window.viewerInterval) { clearInterval(window.viewerInterval); window.viewerInterval = null; }
-      if (window._iptvHealthTimer) { clearInterval(window._iptvHealthTimer); window._iptvHealthTimer = null; }
-      if (window._m3uSyncTimer) { clearInterval(window._m3uSyncTimer); window._m3uSyncTimer = null; }
-      if (window._channelsUiTimer) { clearTimeout(window._channelsUiTimer); }
-      if (window._playbackFirebaseSaveTimer) { clearTimeout(window._playbackFirebaseSaveTimer); }
-      var v = document.getElementById('tvPlayer');
-      if (v && !v.paused) {
-        // Keep playing if user expects TV — but stop network thrash timers only
-      }
-      if (window.windowHls) {
-        try { window.windowHls.stopLoad(); } catch(e) {}
-      }
-    } catch(e) {}
-  }
-  function resumeForeground(){
-    try {
-      if (window.windowHls && window.currentPlayingUrl) {
-        try { window.windowHls.startLoad(-1); } catch(e) {}
-      }
-      if (window.startIPTVHealthMonitor) window.startIPTVHealthMonitor();
-    } catch(e) {}
-  }
-  document.addEventListener('visibilitychange', function(){
-    if (document.hidden) freezeBackground();
-    else resumeForeground();
-  }, {passive:true});
-  window.addEventListener('pagehide', freezeBackground, {passive:true});
-  window.addEventListener('freeze', freezeBackground, {passive:true});
-
-  // Coalesce renderFrontend more aggressively on APK
-  function patchRender(){
-    if (!window.renderFrontend || window.renderFrontend.__apkSmooth) return;
-    var orig = window.renderFrontend.__original || window.renderFrontend;
-    var pending = false, lastArgs = null;
-    function smooth(){
-      lastArgs = arguments;
-      if (pending) return;
-      pending = true;
-      requestAnimationFrame(function(){
-        pending = false;
-        try { orig.apply(window, lastArgs || []); } catch(e) { console.warn(e); }
-      });
-    }
-    smooth.__apkSmooth = true;
-    smooth.__original = orig;
-    window.renderFrontend = smooth;
-  }
-
-  // Destroy HLS hard when zapping fast (prevents memory leak / hang)
-  var _oldPlay = null;
-  function patchPlay(){
-    if (!window._playChannelInternal || window._playChannelInternal.__apkSmooth) return;
-    _oldPlay = window._playChannelInternal;
-    window._playChannelInternal = function(ch, key){
-      try {
-        if (window._playbackTimer) { clearTimeout(window._playbackTimer); window._playbackTimer = null; }
-        if (window.windowHls) {
-          try { window.windowHls.destroy(); } catch(e) {}
-          window.windowHls = null;
-        }
-        var v = document.getElementById('tvPlayer');
-        if (v) {
-          try { v.removeAttribute('src'); v.load(); } catch(e) {}
-        }
-      } catch(e) {}
-      return _oldPlay.apply(this, arguments);
-    };
-    window._playChannelInternal.__apkSmooth = true;
-  }
-
-  // Shorter welcome splash on APK (was 5s — feels like hang)
-  function shortenSplash(){
-    try {
-      var splash = document.getElementById('customerWelcomeSplash');
-      if (!splash) return;
-      var style = document.createElement('style');
-      style.textContent = '#customerWelcomeSplash .st-splash-progress i{animation-duration:1.6s!important}';
-      document.head.appendChild(style);
-      var _show = window.showCustomerWelcome;
-      if (typeof _show === 'function' && !_show.__apkSmooth) {
-        window.showCustomerWelcome = function(){
-          var r = _show.apply(this, arguments);
-          setTimeout(function(){
-            try {
-              var s = document.getElementById('customerWelcomeSplash');
-              if (s) { s.classList.remove('show'); s.style.display = 'none'; }
-            } catch(e) {}
-          }, 1700);
-          return r;
-        };
-        window.showCustomerWelcome.__apkSmooth = true;
-      }
-    } catch(e) {}
-  }
-
-  // Disable simulateViewers noise on APK
-  function muteViewers(){
-    try {
-      if (window.viewerInterval) { clearInterval(window.viewerInterval); window.viewerInterval = null; }
-      var fv = document.getElementById('fakeViewers');
-      if (fv) fv.style.display = 'none';
-      var o = document.getElementById('viewerOverlay');
-      if (o) { o.classList.remove('visible'); o.style.display = 'none'; }
-    } catch(e) {}
-  }
-
-  // Skip admin metric polling when not in admin UI
-  if (window.__startvMetricInterval) clearInterval(window.__startvMetricInterval);
-
-  function boot(){
-    forceApkSettings();
-    patchRender();
-    patchPlay();
-    shortenSplash();
-    muteViewers();
-    // Re-apply after initApp finishes
-    setTimeout(function(){
-      forceApkSettings();
-      patchRender();
-      patchPlay();
-      muteViewers();
-      try {
-        if (window.settings) {
-          window.settings.show_fake_viewers = false;
-          window.settings.iptv_health_interval = 0;
-        }
-        if (window._iptvHealthTimer) { clearInterval(window._iptvHealthTimer); window._iptvHealthTimer = null; }
-      } catch(e) {}
-    }, 800);
-    setTimeout(forceApkSettings, 2500);
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
-  else boot();
-  window.addEventListener('load', function(){ setTimeout(boot, 100); }, {once:true});
-})();
-</script>
-
 </html>
-
-<script>
-// Lightweight periodic admin metric refresh; safe even when the admin panel is closed.
-setInterval(function(){ try { if(document.hidden) return; if(window.__startvIsApk && !(document.getElementById('adminOverlay')&&document.getElementById('adminOverlay').style.display==='flex')) return; if(window.refreshAdminMetrics) window.refreshAdminMetrics(); } catch(e){} }, 60000);
-</script>
